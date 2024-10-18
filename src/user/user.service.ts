@@ -38,7 +38,7 @@ export class UserService {
     const createdHeroHeading = new this.heroHeadlineModel(CreateUserDto);
     return createdHeroHeading.save();
   }
-
+// a
   async findHeroHeadings(res: Response): Promise<any> {
     const data = await this.heroHeadlineModel.find().exec();
     if (data) {
