@@ -62,7 +62,7 @@ export class AuthService {
         const payload = { sub: user._id, name: user.email };
         const token = this.jwts.sign(payload);
         // res.cookie('jwt', token, { httpOnly: true });
-        res.cookie('jwt', token, {
+        res.cookie('token', token, {
           httpOnly: true,
           secure: process.env.NOD_ENV === 'production',
         });

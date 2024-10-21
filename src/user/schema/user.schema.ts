@@ -13,28 +13,20 @@ export class HeroHeadings extends Document {
   secondHeading: string[];
 
   @Prop({ required: true })
-  thirdHeading: string; 
+  thirdHeading: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(HeroHeadings);
-
-
 
 // HowItWorkdata
 
 @Schema()
 export class HowItWorkdata extends Document {
   @Prop({ required: true })
-  firstHeading: string;
-
-  @Prop({ type: [String], required: true })
-  secondHeading: string[];
+  title: string;
 
   @Prop({ required: true })
-  thirdHeading: string; 
+  description: string;
 }
 
 export const HowItWorkSchema = SchemaFactory.createForClass(HowItWorkdata);
-
-
-
