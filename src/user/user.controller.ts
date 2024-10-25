@@ -64,6 +64,91 @@ export class UserController {
     return this.userService.updateHowItWorks(id, updateUserDto, res);
   }
 
+  @SkipJwt()
+  @Post('add-section-heading')
+  async addSectionHeadings(
+    @Body() createUserDto: CreateUserDto,
+    @Res() res: Response,
+  ) {
+    return this.userService.addSectionHeadings(createUserDto, res);
+  }
+
+  @SkipJwt()
+  @Post('update-add-headings/:id') // Route for updating AddHeadings by ID
+  async updateAddHeadings(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.updateSectionHeadings(id, updateUserDto);
+  }
+
+  @SkipJwt()
+  @Get('get-section-headings')
+  findSectionHeadings(@Res() res: Response) {
+    return this.userService.findSectionHeadings(res);
+  }
+
+
+  @SkipJwt()
+  @Post('add-prise-plane')
+  async addPrisePlane(
+    @Body() createUserDto: CreateUserDto,
+    @Res() res: Response,
+  ) {
+    return this.userService.addPrisePlane(createUserDto, res);
+  }
+
+  @SkipJwt()
+  @Get('get-prise-plane')
+  findPrisePlane(@Res() res: Response) {
+    return this.userService.findPrisePlane(res);
+  }
+
+  @SkipJwt()
+@Post('update-prise-plane/:id') // New route for updating a pricing plan by ID
+async updatePrisePlane(
+  @Param('id') id: string, // Extract the pricing plan ID from the route parameter
+  @Body() updateUserDto: UpdateUserDto, // Updated data in the body
+  @Res() res: Response, // Response object to send back the response
+) {
+  return this.userService.updatePrisePlane(id, updateUserDto, res);
+}
+
+@SkipJwt()
+@Delete('delete-prise-plane/:id')
+async deletePrisePlane(
+  @Param('id') id: string,
+  @Res() res: Response,
+) {
+  return this.userService.deletePrisePlane(id, res);
+}
+
+@SkipJwt()
+@Post('add-offer-headings')
+  async addOfferHeadings(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
+    return this.userService.addOfferHeadings(createUserDto, res);
+  }
+
+  @SkipJwt()
+  @Post('update-offer-headings/:id')
+  async updateOfferHeadings(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Res() res: Response) {
+    return this.userService.updateOfferHeadings(id, updateUserDto, res);
+  }
+
+  @SkipJwt()
+  @Get('get-offer-headings')
+  async findOfferHeadings(@Res() res: Response) {
+    return this.userService.findOfferHeadings(res);
+  }
+
+  @SkipJwt()
+  @Delete('delete-offer-headings/:id')
+  async deleteOfferHeadings(@Param('id') id: string, @Res() res: Response) {
+    return this.userService.deleteOfferHeadings(id, res);
+  }
+
+  
+
   @Get('user-data')
   findAll() {
     return this.userService.findAll();
