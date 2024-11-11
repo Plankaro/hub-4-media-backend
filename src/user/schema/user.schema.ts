@@ -33,7 +33,7 @@ export const HowItWorkSchema = SchemaFactory.createForClass(HowItWorkdata);
 
 @Schema()
 export class AddSectionHeadings extends Document {
-  @Prop({ required: true })
+  @Prop({ required: false })
   sectionName: string;
 
   @Prop({ required: true })
@@ -71,7 +71,6 @@ export class Plan extends Document {
 
 export const PlanSchema = SchemaFactory.createForClass(Plan);
 
-
 @Schema()
 export class OfferHeadings extends Document {
   @Prop({ required: true })
@@ -87,3 +86,136 @@ export class OfferHeadings extends Document {
 }
 
 export const OfferHeadingsSchema = SchemaFactory.createForClass(OfferHeadings);
+
+@Schema()
+export class ContactDetail extends Document {
+  @Prop({ required: true })
+  phonNumber: string;
+
+  @Prop({ required: false })
+  extraPhonNumber: string;
+
+  @Prop({ required: true })
+  email: string;
+
+  @Prop({ required: false })
+  extraEmail: string;
+
+  @Prop({ required: true })
+  address: string;
+
+  @Prop({ required: false })
+  googelMapLocation: string;
+  @Prop({ required: false, default: '' })
+  img: string;
+
+  @Prop({ required: false, default: '' })
+  imgPublicID: string;
+}
+
+export const ContactDetailSchema = SchemaFactory.createForClass(ContactDetail);
+
+@Schema({ timestamps: true })
+export class UserEnquiryData extends Document {
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
+  mobile: string;
+
+  @Prop({ required: true, unique: true })
+  email: string;
+
+  @Prop({ required: true })
+  message: string;
+}
+
+export const UserEnquiryDataSchema =
+  SchemaFactory.createForClass(UserEnquiryData);
+
+@Schema({ timestamps: true })
+export class AboutOurCompany extends Document {
+  @Prop({ required: true })
+  heading: string;
+
+  @Prop({ required: true })
+  descriptionOne: string;
+
+  @Prop({ required: false })
+  descriptionTwo: string;
+
+  @Prop({ required: true })
+  sideText: string;
+  @Prop({ required: false, default: '' })
+  img: string;
+
+  @Prop({ required: false, default: '' })
+  imgPublicID: string;
+}
+
+export const AboutOurCompanySchema =
+  SchemaFactory.createForClass(AboutOurCompany);
+
+@Schema()
+export class OurThreePrinciples {
+  @Prop({ required: true })
+  heading: string;
+
+  @Prop({ required: true })
+  subHeading: string;
+
+  @Prop({
+    type: [{ icon: String, heading: String, subheading: String }],
+    required: false,
+  })
+  cards: { icon?: string; heading: string; subheading: string }[];
+}
+
+export const OurThreePrinciplesSchema =
+  SchemaFactory.createForClass(OurThreePrinciples);
+
+@Schema()
+export class WhayChooseUs {
+  @Prop({ required: true })
+  heading: string;
+
+  @Prop({ required: true })
+  subHeading: string;
+
+  @Prop({
+    type: [{ heading: String, description: String }],
+    required: false,
+  })
+  cards: { heading: string; description: string }[];
+  
+  @Prop({ required: false, default: '' })
+  img: string;
+
+  @Prop({ required: false, default: '' })
+  imgPublicID: string;
+}
+
+export const WhayChooseUsSchema = SchemaFactory.createForClass(WhayChooseUs);
+
+@Schema()
+export class Testimonial extends Document {
+  @Prop({ required: false, default: '' })
+  profilePictureUrl: string;
+
+  @Prop({ required: false, default: '' })
+  imgPublicID: string;
+
+  @Prop({ required: true })
+  description: string;
+
+  @Prop({ required: true, min: 1, max: 5 })
+  rating: number;
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
+  designation: string;
+}
+
+export const TestimonialSchema = SchemaFactory.createForClass(Testimonial);
