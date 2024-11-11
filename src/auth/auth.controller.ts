@@ -24,7 +24,7 @@ export class AuthController {
   async isAuth(@Req() req: Request, @Res() res: Response) {
     const jwt = req.cookies['jwt'];
 
-    console.log('token>>', jwt);
+  
 
     const isAuthenticated = await this.authService.checkAuth(jwt);
 
