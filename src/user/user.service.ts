@@ -1,1044 +1,532 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 import {
-  AboutOurCompany,
-  AddSectionHeadings,
-  ContactDetail,
-  HeroHeadings,
-  HowItWorkdata,
-  OfferHeadings,
-  OurThreePrinciples,
-  Plan,
-  Testimonial,
-  UserEnquiryData,
-  WhayChooseUs,
-} from './schema/user.schema';
-import { Response } from 'express';
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  AccountProviderType,
+  EmploymentStatusType,
+  RoleType,
+} from '@prisma/client';
+import { CreateUserDto } from './dto/create-user.dto';
+import { ConfigService } from '@nestjs/config';
+import { compareSync, genSaltSync, hashSync } from 'bcrypt';
+import { capitalize, isEmpty } from 'lodash';
+import {
+  GetUserByDto,
+  GetUserByRoleDto,
+  GetUserFromWebsocket,
+} from './dto/get-user.dto';
+import { DeleteUsersDto } from './dto/delete-user.dto';
+import {
+  CreateExperienceDto,
+  CreateProjectDto,
+  UpdateExperienceDto,
+  UpdateProjectDto,
+  UpdateUserDto,
+} from './dto/update-user.dto';
+import { ForgotPassword } from './dto/forgot-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { SessionUser } from '../auth/interfaces/user.interface';
+import { EnvironmentVariable } from 'src/utils/env.validation';
+import { PrismaService } from 'src/prismaORM/prisma.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(HeroHeadings.name)
-    private heroHeadlineModel: Model<HeroHeadings>,
-    @InjectModel(HowItWorkdata.name)
-    private howItWorkModel: Model<HowItWorkdata>,
-    @InjectModel(AddSectionHeadings.name)
-    private addHeadingsModel: Model<AddSectionHeadings>,
-    @InjectModel(Plan.name)
-    private PlanSchema: Model<Plan>,
-    @InjectModel(OfferHeadings.name)
-    private offerHeadingsModel: Model<OfferHeadings>,
-    @InjectModel(ContactDetail.name)
-    private contactDetailModel: Model<ContactDetail>,
-    @InjectModel(UserEnquiryData.name)
-    private UserEnquiryDataModel: Model<UserEnquiryData>,
-    @InjectModel(AboutOurCompany.name)
-    private readonly aboutModelCompany: Model<AboutOurCompany>,
-    @InjectModel(OurThreePrinciples.name)
-    private readonly ourThreePrinciplesModel: Model<OurThreePrinciples>,
-    @InjectModel(WhayChooseUs.name)
-    private readonly WhayChooseUsModel: Model<WhayChooseUs>,
+    private readonly prisma: PrismaService,
+    private config: ConfigService<EnvironmentVariable>,
+    private cloudinary: CloudinaryService,
+    private readonly emailservice: EmailService
+  ) { }
 
-    @InjectModel(Testimonial.name)
-    private readonly TestimonialModel: Model<Testimonial>,
+  async createUser(role: RoleType, data: CreateUserDto) {
+    const { email, firstName, mobileNumber, image, password, ...rest } = data;
 
-    private readonly cloudinaryService: CloudinaryService,
+    let tempPassword: string;
+    const saltRounds = genSaltSync(this.config.get('BCRYPT_SALT_ROUNDS'));
 
-    // WhayChooseUs
-  ) {}
+    console.log('-> tempPassword', tempPassword);
 
-  async postHeadlines(CreateUserDto: CreateUserDto) {
-    const createdHeroHeading = await new this.heroHeadlineModel(CreateUserDto);
-    return createdHeroHeading.save();
-  }
-
-  async updateHeroHeadings(
-    id: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<any> {
-    try {
-      // Find the document by ID and update it with new data
-      const updatedData = await this.heroHeadlineModel.findOneAndUpdate(
-        { _id: id }, // Filter by ID
-        updateUserDto, // Data to update
-        { new: true }, // Return the updated document
-      );
-
-      if (!updatedData) {
-        // If no document was found with the provided ID
-        return {
-          success: false,
-          message: `Hero heading not found with ID: ${id}`,
-        };
-      }
-
-      // Success response
-      return {
-        data: updatedData,
-        success: true,
-        message: 'Hero heading updated successfully',
-      };
-    } catch (error) {
-      // Error handling for unexpected issues
-      return {
-        success: false,
-        message: 'An error occurred while updating hero heading data',
-        error: error.message,
-      };
-    }
-  }
-
-  async findHeroHeadings(res: Response): Promise<any> {
-    const data = await this.heroHeadlineModel.find().exec();
-    if (data) {
-      res.status(200).json({
-        data: data,
-        success: true,
-        message: 'user data fetch success',
-      });
-    } else {
-      res
-        .status(200)
-        .json({ success: false, message: 'user data not avilable' });
-    }
-  }
-
-  async postHowItWorks(CreateUserDto: CreateUserDto) {
-    const createdHeroHeading = await new this.howItWorkModel(CreateUserDto);
-    return createdHeroHeading.save();
-  }
-
-  async updateHowItWorks(
-    id: string,
-    updateUserDto: UpdateUserDto,
-    res: Response,
-  ): Promise<any> {
-    try {
-      // Find the document by ID and update it with new data
-      const updatedData = await this.howItWorkModel.findOneAndUpdate(
-        { _id: id }, // Filter by ID
-        updateUserDto, // Data to update
-        { new: true }, // Return the updated document
-      );
-
-      if (!updatedData) {
-        // If no document was found with the provided ID
-        return res.status(404).json({
-          success: false,
-          message: `How It Works data not found with ID: ${id}`,
-        });
-      }
-
-      // Success response
-      return res.status(200).json({
-        data: updatedData,
-        success: true,
-        message: 'How It Works data updated successfully',
-      });
-    } catch (error) {
-      // Error handling for unexpected issues
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while updating How It Works data',
-        error: error.message,
-      });
-    }
-  }
-
-  async findHowitWorkData(res: Response): Promise<any> {
-    const data = await this.howItWorkModel.find().exec();
-    if (data) {
-      res.status(200).json({
-        data: data,
-        success: true,
-        message: 'user data fetch success',
-      });
-    } else {
-      res
-        .status(200)
-        .json({ success: false, message: 'user data not avilable' });
-    }
-  }
-
-  async addSectionHeadings(
-    createUserDto: CreateUserDto,
-    res: Response,
-  ): Promise<any> {
-    try {
-      const createdSectionHeading = new this.addHeadingsModel(createUserDto);
-      const savedData = await createdSectionHeading.save();
-      return res.status(201).json({
-        success: true,
-        data: savedData,
-        message: 'Section heading added successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while adding section heading',
-        error: error.message,
-      });
-    }
-  }
-
-  async updateSectionHeadings(id: string, updateUserDto: any): Promise<any> {
-    console.log('data get>>>>>>>>>>>>>>>>', id, updateUserDto);
-    try {
-      const updatedHeading = await this.addHeadingsModel.findOneAndUpdate(
-        { _id: id }, // Filter by ID
-        updateUserDto, // Data to update
-        { new: true }, // Return the updated document
-      );
-      console.log('updatedHeading>><<', updatedHeading);
-      if (!updatedHeading) {
-        return {
-          success: false,
-          message: `AddHeadings not found with ID: ${id}`,
-        };
-      }
-
-      return {
-        data: updatedHeading,
-        success: true,
-        message: 'AddHeadings updated successfully',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'An error occurred while updating AddHeadings data',
-        error: error.message,
-      };
-    }
-  }
-
-  async findSectionHeadings(res: Response): Promise<any> {
-    try {
-      const data = await this.addHeadingsModel.find().exec();
-      if (data.length > 0) {
-        return res.status(200).json({
-          success: true,
-          data: data,
-          message: 'Section headings fetched successfully',
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: 'No section headings found',
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while fetching section headings',
-        error: error.message,
-      });
-    }
-  }
-
-  async findSectionHeadingByName(
-    sectionName: string,
-    res: Response,
-  ): Promise<any> {
-    try {
-      const data = await this.addHeadingsModel.findOne({ sectionName }).exec();
-      if (data) {
-        return res.status(200).json({
-          success: true,
-          data: data,
-          message: `Section heading for '${sectionName}' fetched successfully`,
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: `No section heading found for '${sectionName}'`,
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: `An error occurred while fetching the section heading for '${sectionName}'`,
-        error: error.message,
-      });
-    }
-  }
-
-  async addPrisePlane(
-    createUserDto: CreateUserDto,
-    res: Response,
-  ): Promise<any> {
-    try {
-      const createdSectionHeading = new this.PlanSchema(createUserDto);
-      const savedData = await createdSectionHeading.save();
-      return res.status(201).json({
-        success: true,
-        data: savedData,
-        message: 'Section Price Plane added successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while adding Price Plane',
-        error: error.message,
-      });
-    }
-  }
-
-  async findPrisePlane(res: Response): Promise<any> {
-    try {
-      const data = await this.PlanSchema.find().exec();
-      if (data.length > 0) {
-        return res.status(200).json({
-          success: true,
-          data: data,
-          message: 'Prise Planes fetched successfully',
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: 'No Prise Planes found',
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while fetching Prise Planes',
-        error: error.message,
-      });
-    }
-  }
-
-  async updatePrisePlane(
-    id: string,
-    updateUserDto: UpdateUserDto,
-    res: Response,
-  ): Promise<any> {
-    try {
-      // Find the price plan by ID and update it with new data
-      const updatedPlan = await this.PlanSchema.findOneAndUpdate(
-        { _id: id }, // Filter by ID
-        updateUserDto, // Data to update
-        { new: true }, // Return the updated document
-      );
-
-      if (!updatedPlan) {
-        // If no price plan was found with the provided ID
-        return res.status(404).json({
-          success: false,
-          message: `Price plan not found with ID: ${id}`,
-        });
-      }
-
-      // Success response
-      return res.status(200).json({
-        data: updatedPlan,
-        success: true,
-        message: 'Price plan updated successfully',
-      });
-    } catch (error) {
-      // Error handling for unexpected issues
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while updating price plan',
-        error: error.message,
-      });
-    }
-  }
-
-  async deletePrisePlane(id: string, res: Response): Promise<any> {
-    try {
-      const deletedPlan = await this.PlanSchema.findByIdAndDelete({ _id: id });
-
-      if (!deletedPlan) {
-        return res.status(404).json({
-          success: false,
-          message: `Price plan not found with ID: ${id}`,
-        });
-      }
-
-      return res.status(200).json({
-        success: true,
-        message: 'Price plan deleted successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while deleting price plan',
-        error: error.message,
-      });
-    }
-  }
-
-  async addOfferHeadings(
-    createUserDto: CreateUserDto,
-    res: Response,
-  ): Promise<any> {
-    try {
-      const createdOfferHeading = new this.offerHeadingsModel(createUserDto);
-      const savedData = await createdOfferHeading.save();
-      return res.status(201).json({
-        success: true,
-        data: savedData,
-        message: 'Offer heading added successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while adding offer heading',
-        error: error.message,
-      });
-    }
-  }
-
-  async updateOfferHeadings(
-    id: string,
-    updateUserDto: UpdateUserDto,
-    res: Response,
-  ): Promise<any> {
-    try {
-      const updatedHeading = await this.offerHeadingsModel.findOneAndUpdate(
-        { _id: id },
-        updateUserDto,
-        { new: true },
-      );
-
-      if (!updatedHeading) {
-        return res.status(404).json({
-          success: false,
-          message: `Offer heading not found with ID: ${id}`,
-        });
-      }
-
-      return res.status(200).json({
-        data: updatedHeading,
-        success: true,
-        message: 'Offer heading updated successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while updating offer heading',
-        error: error.message,
-      });
-    }
-  }
-
-  async findOfferHeadings(res: Response): Promise<any> {
-    try {
-      const data = await this.offerHeadingsModel.find().exec();
-      if (data.length > 0) {
-        return res.status(200).json({
-          success: true,
-          data: data,
-          message: 'Offer headings fetched successfully',
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: 'No offer headings found',
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while fetching offer headings',
-        error: error.message,
-      });
-    }
-  }
-
-  async deleteOfferHeadings(id: string, res: Response): Promise<any> {
-    try {
-      const deletedHeading = await this.offerHeadingsModel.findByIdAndDelete({
-        _id: id,
-      });
-
-      if (!deletedHeading) {
-        return res.status(404).json({
-          success: false,
-          message: `Offer heading not found with ID: ${id}`,
-        });
-      }
-
-      return res.status(200).json({
-        success: true,
-        message: 'Offer heading deleted successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while deleting offer heading',
-        error: error.message,
-      });
-    }
-  }
-
-  async createContactDetail(createContactDto: CreateUserDto): Promise<any> {
-    const createdContact = new this.contactDetailModel(createContactDto);
-    await createdContact.save();
-    return { success: true, message: 'Contact details saved successfully' };
-  }
-
-  async getContactDetails(): Promise<any> {
-    try {
-      const contacts = await this.contactDetailModel.find().exec();
-
-      return {
-        success: true,
-        message: 'Contact details retrieved successfully',
-        data: contacts,
-      };
-    } catch (error) {
-      return { success: false, message: 'Failed to retrieve contact details' };
-    }
-  }
-
-  async updateContactDetail(
-    id: string,
-    updateContactDto: Partial<CreateUserDto>,
-    file?: Express.Multer.File,
-  ): Promise<any> {
-    try {
-      // Find the existing testimonial to check for the existing image
-      const existingTestimonial = await this.contactDetailModel.findById(id);
-
-      if (!existingTestimonial) {
-        return {
-          success: false,
-          message: `Contact data not found with ID: ${id}`,
-        };
-      }
-
-      // If an image is provided and there was a previous image, delete the old image
-      let img = '';
-      let imgPublicID = '';
-      if (file) {
-        // Delete the old image if it exists
-        if (existingTestimonial.imgPublicID) {
-          await this.cloudinaryService.deleteImage(
-            existingTestimonial.imgPublicID,
-          );
-        }
-
-        // Upload the new image to Cloudinary
-        const result = await this.cloudinaryService.uploadImage(file);
-        img = result.secure_url;
-        imgPublicID = result.public_id;
-      }
-
-      // Update the testimonial with new data and image information
-      const updatedContactModal =
-        await this.contactDetailModel.findOneAndUpdate(
-          { _id: id }, // Filter by ID
-          {
-            ...updateContactDto,
-            ...(file ? { img, imgPublicID } : {}),
-          },
-          { new: true }, // Return the updated document
-        );
-
-      return {
-        data: updatedContactModal,
-        success: true,
-        message: 'contact updated successfully',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'An error occurred while updating contact details data',
-        error: error.message,
-      };
-    }
-  }
-
-  async submitForm(formDto: CreateUserDto): Promise<any> {
-    try {
-      const formSubmission = new this.UserEnquiryDataModel(formDto);
-      await formSubmission.save();
-      return { success: true, message: 'Form submitted successfully' };
-    } catch (error) {
-      return { success: false, message: 'Failed to submit form' };
-    }
-  }
-
-  async createAbout(data: {
-    heading: string;
-    descriptionOne: string;
-    descriptionTwo: string;
-    sideText: string;
-  }) {
-    try {
-      const aboutData = new this.aboutModelCompany(data);
-      await aboutData.save();
-      return {
-        success: true,
-        message: 'About our company information submitted successfully',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to submit about our company information',
-        error: error.message,
-      };
-    }
-  }
-
-  async updateAbout(
-    id: string,
-    updateAboutDto: Partial<CreateUserDto>,
-    file?: Express.Multer.File,
-  ) {
-    try {
-      // Find the existing testimonial to check for the existing image
-      const existingData = await this.aboutModelCompany.findById(id);
-
-      if (!existingData) {
-        return {
-          success: false,
-          message: `About Data not found with ID: ${id}`,
-        };
-      }
-
-      // If an image is provided and there was a previous image, delete the old image
-      let img = '';
-      let imgPublicID = '';
-      if (file) {
-        // Delete the old image if it exists
-        if (existingData.imgPublicID) {
-          await this.cloudinaryService.deleteImage(existingData.imgPublicID);
-        }
-
-        // Upload the new image to Cloudinary
-        const result = await this.cloudinaryService.uploadImage(file);
-        img = result.secure_url;
-        imgPublicID = result.public_id;
-      }
-
-      // Update the testimonial with new data and image information
-      const updatedData = await this.aboutModelCompany.findOneAndUpdate(
-        { _id: id }, // Filter by ID
-        {
-          ...updateAboutDto,
-          ...(file ? { img, imgPublicID } : {}),
+    return this.prisma.user
+      .findUnique({
+        where: {
+          mobileNumber,
+          email,
         },
-        { new: true }, // Return the updated document
-      );
-
-      return {
-        data: updatedData,
-        success: true,
-        message: 'contact updated successfully',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'An error occurred while updating contact details data',
-        error: error.message,
-      };
-    }
-  }
-
-  async getAbouOurCompany(): Promise<any> {
-    try {
-      const data = await this.aboutModelCompany.find().exec();
-
-      return {
-        success: true,
-        message: 'about our company  retrieved successfully',
-        data: data,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to retrieve about our company',
-      };
-    }
-  }
-
-  async addOurThreePrinciples(
-    createUserDto: CreateUserDto,
-    res: Response,
-  ): Promise<any> {
-    try {
-      const createdPrinciple = new this.ourThreePrinciplesModel(createUserDto);
-      const savedData = await createdPrinciple.save();
-      return res.status(201).json({
-        success: true,
-        data: savedData,
-        message: 'Our Three Principles added successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while adding Our Three Principles',
-        error: error.message,
-      });
-    }
-  }
-
-  // Update OurThreePrinciples
-  async updateOurThreePrinciples(
-    id: string,
-    updateUserDto: UpdateUserDto,
-    res: Response,
-  ): Promise<any> {
-    try {
-      const updatedPrinciple =
-        await this.ourThreePrinciplesModel.findOneAndUpdate(
-          { _id: id },
-          updateUserDto,
-          { new: true },
-        );
-
-      if (!updatedPrinciple) {
-        return res.status(404).json({
-          success: false,
-          message: `Our Three Principles not found with ID: ${id}`,
-        });
-      }
-
-      return res.status(200).json({
-        data: updatedPrinciple,
-        success: true,
-        message: 'Our Three Principles updated successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while updating Our Three Principles',
-        error: error.message,
-      });
-    }
-  }
-
-  // Get OurThreePrinciples
-  async getOurThreePrinciples(res: Response): Promise<any> {
-    try {
-      const data = await this.ourThreePrinciplesModel.find().exec();
-      if (data.length > 0) {
-        return res.status(200).json({
-          success: true,
-          data: data,
-          message: 'Our Three Principles fetched successfully',
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: 'No Our Three Principles found',
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while fetching Our Three Principles',
-        error: error.message,
-      });
-    }
-  }
-
-  //whaychoose us
-
-  async addOurWhayChooseUs(
-    createUserDto: CreateUserDto,
-    res: Response,
-  ): Promise<any> {
-    try {
-      const createdPrinciple = new this.WhayChooseUsModel(createUserDto);
-      const savedData = await createdPrinciple.save();
-      return res.status(201).json({
-        success: true,
-        data: savedData,
-        message: 'Our Three Principles added successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while adding Our Three Principles',
-        error: error.message,
-      });
-    }
-  }
-
-  async updateWhayChooseUs(
-    id: string,
-    updateWhayChooseUsDTO: CreateUserDto,
-    file?: Express.Multer.File,
-  ): Promise<any> {
-   
-    try {
-      const existingData = await this.WhayChooseUsModel.findById(id);
-      console.log('existing>>>>>>', existingData);
-
-      if (!existingData) {
-        return {
-          success: false,
-          message: `About Data not found with ID: ${id}`,
-        };
-      }
-
-      let img = '';
-      let imgPublicID = '';
-      if (file) {
-        // Delete the old image if it exists
-        if (existingData.imgPublicID) {
-          await this.cloudinaryService.deleteImage(existingData.imgPublicID);
-        }
-
-        const result = await this.cloudinaryService.uploadImage(file);
-        img = result.secure_url;
-        imgPublicID = result.public_id;
-      }
-
-      const updatedData = await this.WhayChooseUsModel.findOneAndUpdate(
-        { _id: id },
-        {
-          ...updateWhayChooseUsDTO,
-          ...(file ? { img, imgPublicID } : {}),
+        select: {
+          id: true,
         },
-        { new: true },
-      );
-
-      return {
-        data: updatedData,
-        success: true,
-        message: 'whay choose us updated successfully',
-      };
-    } catch (error) {
-      console.log(error.message);
-      return {
-        success: false,
-        message: 'An error occurred while updating whaychoose us details data',
-        error: error.message,
-      };
-    }
+      })
+      .then(async (value) => {
+        if (value) {
+          throw new InternalServerErrorException({
+            succcess: false,
+            msg: 'you are already registered 🤨',
+          });
+        }
+        const imageUpload = (await this.cloudinary.uploadFiles(image))[0];
+        return this.prisma.user.create({
+          data: {
+            email,
+            firstName,
+            mobileNumber,
+            ...(imageUpload &&
+              imageUpload.url && {
+              image: {
+                set: {
+                  name: imageUpload.original_filename,
+                  url: imageUpload.url,
+                },
+              },
+            }),
+            role,
+            ...rest,
+            accounts: {
+              create: {
+                provider: AccountProviderType.CREDENTIAL,
+                providerId: AccountProviderType.CREDENTIAL,
+                email,
+                mobileNumber,
+                username: mobileNumber,
+                passwordHash: hashSync(password, saltRounds),
+              },
+            },
+          },
+          include: {
+            accounts: true,
+          },
+        });
+      });
   }
 
-  async getWhayChooseUs(res: Response): Promise<any> {
+  async postExperience(data: CreateExperienceDto) {
+    const { userId, ...rest } = data;
+    console.log(data);
+    await this.prisma.experience.create({
+      data: {
+        ...rest,
+        User: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
+    return {
+      success: true,
+      message: 'Experience added successfully',
+    };
+  }
+
+  async postProject(data: CreateProjectDto) {
+    const { userId, ...rest } = data;
+    await this.prisma.projects.create({
+      data: {
+        ...rest,
+        User: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Project created successfully',
+    };
+  }
+
+  async updateUser(role: RoleType, data: UpdateUserDto) {
     try {
-      const data = await this.WhayChooseUsModel.find().exec();
-      if (data.length > 0) {
-        return res.status(200).json({
-          success: true,
-          data: data,
-          message: 'Our Three Principles fetched successfully',
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: 'No Our Three Principles found',
+      const { id, image, project, experience, ...rest } = data;
+      // console.log(data);
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id,
+          isTrash: false,
+        },
+      });
+      if (!user) {
+        throw new InternalServerErrorException('user not found');
+      }
+      const imageUpload = image
+        ? (await this.cloudinary.uploadFiles(image))[0]
+        : undefined;
+
+      if (project) {
+        await this.prisma.projects.update({
+          where: {
+            id: project.id,
+          },
+          data: {
+            title: project.title,
+            description: project.description,
+            link: project.link,
+          },
         });
       }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while fetching Our Three Principles',
-        error: error.message,
-      });
-    }
-  }
-
-  //tesitmonials
-  async uploadUserImage(file: Express.Multer.File): Promise<any> {
-    console.log('file>><<', file);
-    try {
-      const result = await this.cloudinaryService.uploadImage(file);
-      console.log('your_public_id_here', result);
-      return {
-        success: true,
-        imageUrl: result.secure_url,
-      };
-    } catch (error) {
-      return { success: false, message: 'Image upload failed' };
-    }
-  }
-  async addTesimonials(
-    createUserDto: CreateUserDto,
-    res: Response,
-    file?: Express.Multer.File,
-  ): Promise<any> {
-    try {
-      let profilePictureUrl = '';
-      let imgPublicID = '';
-
-      // If a file is provided, upload it to Cloudinary
-      if (file) {
-        const result = await this.cloudinaryService.uploadImage(file);
-        profilePictureUrl = result.secure_url;
-        imgPublicID = result.public_id;
+      if (experience) {
+        const { id, ...rest } = experience;
+        await this.prisma.experience.update({
+          where: {
+            id: id,
+            isTrash: false,
+          },
+          data: {
+            ...rest,
+          },
+        });
       }
 
-      // Create the testimonial with or without image data
-      const testimonialData = {
-        ...createUserDto,
-        profilePictureUrl,
-        imgPublicID,
-      };
-      const createdTestimonial = new this.TestimonialModel(testimonialData);
-      const savedData = await createdTestimonial.save();
-
-      return res.status(HttpStatus.CREATED).json({
-        success: true,
-        data: savedData,
-        message: 'Testimonial added successfully',
+      await this.prisma.user.update({
+        where: {
+          id,
+          isTrash: false,
+        },
+        data: {
+          ...rest,
+          ...(image &&
+            imageUpload &&
+            imageUpload.url && {
+            image: {
+              set: {
+                name: imageUpload.original_filename,
+                url: imageUpload.url,
+              },
+            },
+          }),
+        },
+        include: {
+          employeeStatus: true,
+          projects: true,
+        },
       });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+
+      return {
+        success: true,
+        message: 'Profile Updated Successfully',
+      };
+    } catch (err) {
+      throw new InternalServerErrorException({
         success: false,
-        message: 'An error occurred while adding Testimonial',
-        error: error.message,
+        message: 'Could not update user',
       });
     }
   }
 
-  async updateTesimonials(
-    id: string,
-    updateUserDto: UpdateUserDto,
-    file?: Express.Multer.File, // Include the file parameter
-  ): Promise<any> {
-    try {
-      // Find the existing testimonial to check for the existing image
-      const existingTestimonial = await this.TestimonialModel.findById(id);
+  getAllUsers(params: GetUserByRoleDto) {
+    const { role } = params;
+    return this.prisma.user.findMany({
+      where: {
+        isTrash: false,
+      }, include: {
+        appliedJobs: {
+          where: {
+            isTrash: false
 
-      if (!existingTestimonial) {
+          }
+        }
+      },
+
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+  getAllProject(userId: string) {
+    return this.prisma.projects.findMany({
+      where: {
+        isTrash: false,
+        userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+  getAllExperience(userId: string) {
+    return this.prisma.experience.findMany({
+      where: {
+        isTrash: false,
+        userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+  getAllSkills(userId: string) {
+    return this.prisma.user.findUnique({
+      where: {
+        isTrash: false,
+        id: userId,
+      },
+      select: {
+        skills: true,
+      },
+    });
+  }
+  async postSkills(userId: string, skills: string[]) {
+    try {
+      if (skills.length == 0) {
         return {
           success: false,
-          message: `Testimonial not found with ID: ${id}`,
+          message: 'please select atleast one skill',
         };
       }
-
-      // If an image is provided and there was a previous image, delete the old image
-      let profilePictureUrl = '';
-      let imgPublicID = '';
-      if (file) {
-        // Delete the old image if it exists
-        if (existingTestimonial.imgPublicID) {
-          await this.cloudinaryService.deleteImage(
-            existingTestimonial.imgPublicID,
-          );
-        }
-
-        // Upload the new image to Cloudinary
-        const result = await this.cloudinaryService.uploadImage(file);
-        profilePictureUrl = result.secure_url;
-        imgPublicID = result.public_id;
+      const user = await this.prisma.user.findUnique({
+        where: {
+          isTrash: false,
+          id: userId,
+        },
+      });
+      console.log(skills);
+      if (!user) {
+        throw new InternalServerErrorException('User not found');
       }
 
-      // Update the testimonial with new data and image information
-      const updatedTestimonialModel =
-        await this.TestimonialModel.findOneAndUpdate(
-          { _id: id }, // Filter by ID
-          {
-            ...updateUserDto,
-            ...(file ? { profilePictureUrl, imgPublicID } : {}), // Update image fields only if a file is provided
+      // Create a new set to hold the unique skills (no duplicates)
+      const uniqueSkills = new Set([...user.skills, ...skills]);
+
+      // Convert the set back to an array
+      const updatedSkills = Array.from(uniqueSkills);
+
+      await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          skills: updatedSkills,
+        },
+      });
+
+      return {
+        success: true,
+        message: 'Skills updated successfully',
+      };
+    } catch (err) {
+      throw new InternalServerErrorException({
+        success: false,
+        message: 'failed to add skills',
+      });
+    }
+  }
+
+  async deleteSkills(userId: string, skills: string) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+      if (!user) {
+        throw new NotFoundException('user Not Exists');
+      }
+      const allskills = user.skills;
+
+      const filterskills: string[] = allskills.filter(
+        (skill) => skills != skill,
+      );
+      console.log(filterskills);
+      await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          skills: filterskills,
+        },
+      });
+      return {
+        success: true,
+        message: 'skill updated successfully',
+      };
+    } catch (err) {
+      throw new InternalServerErrorException({
+        success: false,
+        message: 'failed to delete skill',
+      });
+    }
+  }
+
+
+  async sendOtp(email: string) {
+    try {
+      const otpData = await this.prisma.otp.findFirst({
+        where: {
+          email,
+        },
+      });
+      if (otpData) {
+        await this.prisma.otp.delete({
+          where: {
+            email,
           },
-          { new: true }, // Return the updated document
-        );
-
-      return {
-        data: updatedTestimonialModel,
-        success: true,
-        message: 'Testimonial updated successfully',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'An error occurred while updating Testimonial data',
-        error: error.message,
-      };
-    }
-  }
-
-  // async updateTesimonials(
-  //   id: string,
-  //   updateUserDto: UpdateUserDto,
-
-  // ): Promise<any> {
-  //   try {
-  //     const updatedTestimonialModel =
-  //       await this.TestimonialModel.findOneAndUpdate(
-  //         { _id: id }, // Filter by ID
-  //         updateUserDto, // Data to update
-  //         { new: true }, // Return the updated document
-  //       );
-
-  //     if (!updatedTestimonialModel) {
-  //       return {
-  //         success: false,
-  //         message: `Testimonial not found with ID: ${id}`,
-  //       };
-  //     }
-
-  //     return {
-  //       data: updatedTestimonialModel,
-  //       success: true,
-  //       message: 'Testimonial updated successfully',
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       message: 'An error occurred while updating Testimonial data',
-  //       error: error.message,
-  //     };
-  //   }
-  // }
-
-  async findTesimonials(res: Response): Promise<any> {
-    try {
-      const data = await this.TestimonialModel.find().exec();
-      if (data.length > 0) {
-        return res.status(200).json({
-          success: true,
-          data: data,
-          message: 'Testimonial fetched successfully',
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: 'No section Testimonial found',
         });
       }
-    } catch (error) {
-      return res.status(500).json({
+
+      function generateSixDigitOTP(): number {
+        const min = 100000;
+        const max = 999999;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      const otp: number = generateSixDigitOTP();
+      await this.emailservice.sendOTPEmail(email, otp);
+      await this.prisma.otp.create({
+        data: {
+          email,
+          otp,
+        },
+      });
+      return {
+        success: true,
+        message: 'otp send sucessfully',
+      };
+    } catch (err) {
+      return new InternalServerErrorException({
         success: false,
-        message: 'An error occurred while fetching Testimonial',
-        error: error.message,
+        message: 'otp send failed',
       });
     }
   }
 
-  async deleteTestimonial(id: string, res: Response): Promise<any> {
+  async verifyOtp(email: string, otp: number): Promise<any> {
     try {
-      // First, find the testimonial by ID to retrieve the image details
-      const testimonial = await this.TestimonialModel.findById(id);
-      if (!testimonial) {
-        return res.status(404).json({
-          success: false,
-          message: `Testimonial not found with ID: ${id}`,
-        });
+      console.log('verify');
+      const otpData = await this.prisma.otp.findFirst({
+        where: {
+          AND: [{ email }, { otp }],
+        },
+      });
+      if (!otpData) {
+        throw new NotFoundException({ message: 'No otp found' });
       }
 
-      // If the testimonial has an associated image, delete it from Cloudinary
-      if (testimonial.imgPublicID) {
-        await this.cloudinaryService.deleteImage(testimonial.imgPublicID); // Assuming this method is defined in your Cloudinary service
-      }
-
-      // Now delete the testimonial from the database
-      await this.TestimonialModel.findByIdAndDelete(id);
-
-      return res.status(200).json({
+      return {
         success: true,
-        message: 'Testimonial deleted successfully',
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while deleting the testimonial',
-        error: error.message,
-      });
+        message: 'otp successfully verified',
+      };
+    } catch (err) {
+      throw new InternalServerErrorException(err);
     }
+  }
+  async forgotPassword(data: ForgotPassword): Promise<any> {
+    try {
+      const { email, newPassword } = data;
+      const saltRounds = genSaltSync(this.config.get('BCRYPT_SALT_ROUNDS'));
+      const daa = await this.prisma.account.updateMany({
+        where: {
+          email,
+          isTrash: false,
+          provider: AccountProviderType.CREDENTIAL,
+        },
+        data: {
+          passwordHash: hashSync(newPassword, saltRounds),
+        },
+      });
+      console.log(daa)
+      return {
+        success: true,
+        message: "password changed successfully"
+      }
+    } catch (err: any) {
+      return new InternalServerErrorException(err.message);
+    }
+  }
+
+  async changePassword(data: ChangePasswordDto, session: SessionUser) {
+    const { oldPassword, newPassword } = data;
+    const { userId } = session;
+    const saltRounds = genSaltSync(this.config.get('BCRYPT_SALT_ROUNDS'));
+
+    return this.prisma.user
+      .findUnique({
+        where: {
+          id: userId,
+        },
+        include: {
+          accounts: {
+            where: {
+              isTrash: false,
+              provider: AccountProviderType.CREDENTIAL,
+            },
+          },
+        },
+      })
+      .then((value) => {
+        if (!value) {
+          throw new NotFoundException({
+            msg: "User isn't found",
+          });
+        } else {
+          const { accounts } = value;
+          const account = accounts[0];
+          if (!account) {
+            throw new NotFoundException({
+              msg: "Account isn't found",
+            });
+          } else {
+            const { id, passwordHash } = account;
+            if (passwordHash && compareSync(oldPassword, passwordHash)) {
+              return this.prisma.account.update({
+                where: {
+                  id,
+                },
+                data: {
+                  passwordHash: hashSync(newPassword, saltRounds),
+                },
+              });
+            } else {
+              throw new NotFoundException({
+                msg: 'Old Password is incorrect',
+              });
+            }
+          }
+        }
+      });
+  }
+
+  async deleteUser(body: DeleteUsersDto) {
+    const { ids } = body;
+    return this.prisma.user
+      .updateMany({
+        where: {
+          id: {
+            in: ids,
+          },
+        },
+        data: {
+          isTrash: true,
+        },
+      })
+      .then(({ count }) => {
+        return {
+          count,
+          message: `Deleted ${count} users`,
+        };
+      });
+  }
+
+  getSudentsCount() {
+    return this.prisma.user.count({
+      where: {
+        isTrash: false,
+      },
+    });
+  }
+
+  getUserById(params: GetUserByDto) {
+    const { id } = params;
+    return this.prisma.user.findUnique({
+      where: {
+        id,
+        isTrash: false,
+      },
+    });
   }
 }

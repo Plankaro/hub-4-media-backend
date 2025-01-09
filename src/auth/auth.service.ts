@@ -1,203 +1,342 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  Req,
+  Res,
+  UnauthorizedException,
 } from '@nestjs/common';
-
-import { InjectModel } from '@nestjs/mongoose';
-
-import { Model } from 'mongoose';
-import * as bcrypt from 'bcrypt';
-
+import { SignInDto } from './dto/sign-in.dto';
 import { JwtService } from '@nestjs/jwt';
-import { Users } from './schemas/auth.schema';
-import { signUpDto } from './dto/signup.dto';
-import { loginDto, loginOtpDto } from './dto/login.dto';
-import { OtpService } from './otp.service';
-import { Response } from 'express';
+import { AccountProviderType, RoleType } from '@prisma/client';
+import { filter } from 'lodash';
+import { compareSync } from 'bcrypt';
+import { Request, Response } from 'express';
+import { LocalUser, SessionUser } from './interfaces/user.interface';
+import { addDays } from 'date-fns';
+import { GoogleProfileInterface } from './interfaces/google-profile.interface';
+import { ConfigService } from '@nestjs/config';
+
+import * as dotenv from 'dotenv';
+import { EnvironmentVariable } from 'src/utils/env.validation';
+import { PrismaService } from 'src/prismaORM/prisma.service';
+import { UserService } from 'src/user/user.service';
+
+dotenv.config();
+
+interface USER {
+  name: {
+    familyName: string;
+    givenName: string;
+  };
+  image: {
+    value: string;
+  }[];
+  email: string;
+}
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(Users.name)
-    private authModal: Model<Users>,
-    private jwts: JwtService,
-    private otpService: OtpService,
-  ) {}
+    private readonly prisma: PrismaService,
+    private readonly jwt: JwtService,
+    private readonly userService: UserService,
+  ) // private readonly configService: ConfigService<EnvironmentVariable, true>,
+  { }
 
-  async signup(
-    signUpDto: signUpDto,
-  ): Promise<{ message: string; success: boolean }> {
-    const { email, password } = signUpDto;
+  async signIn(role: RoleType, _: SignInDto, res: Response, user: LocalUser) {
+    const { id } = user;
 
-    // Check if the user already exists
-    const existingUser = await this.authModal.findOne({ email }).exec();
-    if (existingUser) {
-      throw new ConflictException('User already registered with this email');
+    if (user.role !== role) {
+      console.log('Unauthorized role');
+      throw new UnauthorizedException('Login to the dashboard is not allowed');
     }
-    const saltRounds = 10;
-
-    const hashedPassword = await bcrypt.hash(signUpDto.password, saltRounds);
-
-    // Replace plain password with hashed password
-    const userWithHashedPassword = { ...signUpDto, password: hashedPassword };
-
-    const createdUser = new this.authModal(userWithHashedPassword);
-    const user = await createdUser.save();
-
-    return { message: 'User added successfully', success: true };
-  }
-
-  async login(loginDto: loginDto, res: Response): Promise<any> {
-    const { email, password } = loginDto;
-
-    const user = await this.authModal.findOne({ email }).exec();
-
-    if (user) {
-      // Compare passwords
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-
-      if (isPasswordValid) {
-        // Generate a JWT token
-        const payload = { sub: user._id, name: user.email };
-        const token = this.jwts.sign(payload);
-        // res.cookie('jwt', token, { httpOnly: true });
+    const expiryAt = addDays(new Date(), 7).toISOString();
+    this.prisma.session
+      .create({
+        data: {
+          expiryAt,
+          role,
+          user: {
+            connect: {
+              id,
+            },
+          },
+        },
+      })
+      .then((session) => {
+        const token = this.jwt.sign({ sid: session.id, role: session.role });
         res.cookie('token', token, {
-          httpOnly: true,
-          secure: process.env.NOD_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 1000 * 60 * 60 * 24 * 7,
         });
-
-        res.status(200).json({
-          message: 'User verified successfully',
-          token,
-          success: true,
+        res.status(201).json({
+          // id:id,
+          isActive: session.isActive,
+          User: user,
         });
-        // return { message: 'User verified successfully', token, success: true };
-      } else {
-        res.json({ message: 'Invalid credentials', success: false });
-      }
-    } else {
-      res.json({ message: 'User not found', success: false });
-    }
+      });
   }
 
-  async checkAuth(token: string): Promise<boolean> {
-    if (!token) {
-      return false;
-    }
+  async validateUser(payload: SignInDto) {
+    const { username, password } = payload;
+    console.log(username, password);
+    return this.prisma.user
+      .findFirst({
+        where: {
+          OR: [
+            {
+              email: username,
+            },
+            {
+              mobileNumber: {
+                equals: username,
+              },
+            },
+          ],
+          isTrash: false,
+          accounts: {
+            some: {
+              provider: AccountProviderType.CREDENTIAL,
+              isTrash: false,
+              passwordHash: {
+                not: null,
+              },
+              OR: [
+                {
+                  username: {
+                    equals: username,
+                  },
+                },
+                {
+                  email: {
+                    equals: username,
+                  },
+                },
+                {
+                  mobileNumber: {
+                    equals: username,
+                  },
+                },
+              ],
+            },
+          },
+        },
+        select: {
+          id: true,
+          mobileNumber: true,
+          role: true,
+          accounts: {
+            where: {
+              isTrash: false,
+              provider: AccountProviderType.CREDENTIAL,
+            },
+          },
+        },
+      })
+      .then((user) => {
+        console.log(user);
+        if (!user) throw new NotFoundException(' user Not found');
+        const { accounts } = user;
+        const isPasswordValid = filter(accounts).some((account) => {
+          const { passwordHash } = account;
+          if (!passwordHash) return false;
+          return compareSync(password, passwordHash);
+        });
+        console.log(isPasswordValid);
+        if (!isPasswordValid) throw new UnauthorizedException();
+        return user;
+      });
+  }
 
+  async validateGoogleLoginUser(profile: GoogleProfileInterface) {
+    const { emails, id } = profile;
+    const email = emails[0].value;
     try {
-      // Verify JWT token
-      const decoded = this.jwts.verify(token);
-      return !!decoded;
-    } catch (err) {
-      return false;
+      const user: any = await this.prisma.user.findUnique({
+        where: {
+          email,
+          isTrash: false,
+        },
+      });
+
+      if (!user) {
+        return false;
+      }
+
+      // return this.prisma.account.create({
+      //   data: {
+      //     provider: AccountProviderType.GOOGLE,
+      //     providerId: id,
+      //     username: email,
+      //     user: {
+      //       connect: {
+      //         id: user.id,
+      //       },
+      //     },
+      //   },
+      //   include: {
+      //     user: true,
+      //   },
+      // });
+      return user;
+    } catch (err: any) {
+      throw new InternalServerErrorException(err?.message);
     }
   }
 
-  async sendOtp(email: string): Promise<{ message: string; success: boolean }> {
-    // Check if the user exists
+  async getSession(Userrole: RoleType, id: string) {
+    return this.prisma.session
+      .findUnique({
+        where: {
+          id,
+          isActive: true,
+          user: {
+            isNot: undefined,
+          },
+          role: {
+            not: undefined,
+          },
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              role: true,
+              email: true,
+              image: true,
+              skills: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      })
+      .then((session) => {
+        if (!session) throw new NotFoundException();
+        const role = session?.role;
+        // console.log({session, role});
+        if (Userrole !== role) {
+          console.log({ Userrole, role });
+          throw new BadRequestException(
+            `please logged in to ${role} dashboard`,
+          );
+        }
 
-    const user = await this.authModal.findOne({ email }).exec();
-    if (!user) {
-      console.log('email', email);
-      throw new BadRequestException('User with this email does not exist');
-    }
-
-    // Generate and send OTP
-    const otp = this.otpService.generateOtp();
-    this.otpService.saveOtp(email, otp);
-    await this.otpService.sendOtp(email, otp);
-
-    return { message: 'OTP sent successfully', success: true };
+        return session;
+      });
   }
 
-  async loginWithOtp(
-    loginOtpDto: loginOtpDto,res: Response
-  ): Promise<any> {
-    const { email, otp } = loginOtpDto;
-
-    const user = await this.authModal.findOne({ email }).exec();
-    if (!user) {
-      res.status(400).json({ message: 'User not found', success: false }) ;
+  async googleLogin(@Req() req: Request, @Res() res: Response) {
+    if (!req.user) {
+      throw new NotFoundException("User isn't found");
     }
+    const user: any = req.user;
+    console.log(user);
+    const isProd = process.env.NODE_ENV === 'production';
+    const redirectUrl = 'https://job.stackkaroo.com';
+    // https://job.stackkaroo.com/jobpost
+    // const redirectUrl = 'http://localhost:3000';
 
-    // Validate the OTP
-    const isOtpValid = await this.otpService.validateOtp(email, otp);
+    if (user.isExistingUser) {
+      const account = user.data;
+      const { id } = user.data;
+      const expiryAt = addDays(new Date(), 7).toISOString();
+      this.prisma.session
+        .create({
+          data: {
+            expiryAt,
+            user: {
+              connect: {
+                id,
+              },
+            },
+            role: RoleType.STUDENT,
+          },
+        })
+        .then((session) => {
+          const token = this.jwt.sign({ sid: session.id, role: session.role });
+          console.log('-> token', session);
+          res
+            .cookie('token', token, {
+              sameSite: 'strict',
+              secure: true,
+              maxAge: 1000 * 60 * 60 * 24 * 7,
+            })
+            .redirect(redirectUrl);
 
-    if (isOtpValid) {
-      await this.authModal.updateOne({ email }, { emailVerify: true }).exec();
-      // Generate JWT token
-      const payload = { sub: user._id, name: user.email };
-      const token = this.jwts.sign(payload);
-      res.cookie('jwt', token, {
-        httpOnly: true,
-        secure: process.env.NOD_ENV === 'production',
-      });
-
-      res.status(200).json({
-        message: 'OTP verified successfully',
-        token,
-        success: true,
-      });
-      // return { message: 'OTP verified successfully', token, success: true };
+        });
     } else {
+      res.redirect('https://job.stackkaroo.com/auth');
+      // res.send(
+      //   `<h1>Please sign up first </h1> </br> <a href="${redirectUrl}">Go Home</a>`,
+      // );
+      // console.log(user.data as USER);
+      // const redirectUri = "https://job.stackkaroo.com"
 
-       res.json({ message: 'Invalid or expired OTP', success: false });
+      // this.userService.createUser("STUDENT",user.data)
+      // const { name, image, email } = user.data as USER;
+      // this.prisma.user.create({
+      //   data: {
+      //     firstName: name.familyName,
+      //     lastName: name.givenName,
+      //     email,
+      //     image: {
+      //       set: {
+      //         name: 'profile',
+      //         url: image[0].value,
+      //       },
+      //     },
+      //     role: RoleType.STUDENT,
+      //   },
+      // }).then((user) => {
+      //   const { id } = user;
+      //   const expiryAt = addDays(new Date(), 7).toISOString();
+      //   this.prisma.session
+      //     .create({
+      //       data: {
+      //         expiryAt,
+      //         user: {
+      //           connect: {
+      //             id,
+      //           },
+      //         },
+      //         role: RoleType.STUDENT,
+      //       },
+      //     })
+      //     .then((session) => {
+      //       const token = this.jwt.sign({ sid: session.id, role: session.role });
+      //       console.log('-> token', token);
+      //       res
+      //         .cookie('token', token, {
+      //           sameSite: 'strict',
+      //           secure: true,
+      //           maxAge: 1000 * 60 * 60 * 24 * 7,
+      //         })
+      //         .redirect(redirectUrl);
+
+      //     });
+      // })
     }
   }
 
-  async forgetPassword(email: string): Promise<{ message: string,success:boolean }> {
-    const user = await this.authModal.findOne({ email }).exec();
-    if (!user) {
-      throw new BadRequestException('User with this email does not exist');
-    }
-
-    // Generate and send OTP
-    const otp = this.otpService.generateOtp();
-    this.otpService.saveOtp(email, otp);
-    await this.otpService.sendOtp(email, otp);
-
-    return { message: 'OTP sent successfully',success:true };
-  }
-
-  async resetPassword(
-    email: string,
-    otp: string,
-    newPassword: string,
-  ): Promise<{ message: string; success: boolean }> {
-    const user = await this.authModal.findOne({ email }).exec();
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
-    // Validate the OTP
-    const isOtpValid = this.otpService.validateOtp(email, otp);
-    if (!isOtpValid) {
-      throw new BadRequestException('Invalid or expired OTP');
-    }
-
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update the user's password in the database
-    await this.authModal
-      .updateOne({ email }, { password: hashedPassword })
-      .exec();
-
-    // Optionally, delete the OTP from the database if stored there
-    this.otpService.deleteOtp(email);
-
-    return { message: 'Password updated successfully', success: true };
-  }
-
-  logoutUser(res: Response) {
-    console.log('logout');
-    res.cookie('jwt', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-    });
-
-    res.status(200).json({ message: 'Logged out successfully', success: true });
+  async signOut(res: Response, session: SessionUser) {
+    const { id } = session;
+    this.prisma.session
+      .update({
+        where: {
+          id,
+        },
+        data: {
+          isActive: false,
+        },
+      })
+      .then(({ isActive }) => {
+        res.clearCookie('token');
+        res.status(201).json({
+          isActive,
+        });
+      });
   }
 }

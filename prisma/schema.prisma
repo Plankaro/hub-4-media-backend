@@ -1,0 +1,285 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleType {
+  ADMIN
+  STUDENT
+}
+
+enum AccountProviderType {
+  GOOGLE
+  CREDENTIAL
+}
+
+enum AppliedStatusType {
+  Applied
+  Selected
+  Rejected
+}
+
+enum AssessmentStatusType {
+  Pending
+  Completed
+  Rejected
+}
+
+enum InterviewStatusType {
+  NotStrated
+  Ongoing
+  Selected
+  Rejected
+}
+
+enum AssessMentsTypes {
+  Pending
+  Completed
+  Rejected
+}
+
+enum EmploymentStatusType {
+  Full_Time
+  UNEMPLOYED
+  SELF_EMPLOYED
+  STUDENT
+  FREELANCING
+  ON_CONTRACT
+}
+
+enum InterrviewStatusType {
+  scheduled
+  completed
+  closed
+}
+
+type Image {
+  name      String
+  url       String
+  createdAt DateTime @default(now())
+}
+
+model Session {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId()
+  isActive  Boolean  @default(true)
+  ip        String   @default("")
+  browser   String   @default("")
+  os        String   @default("")
+  device    String   @default("")
+  expiryAt  DateTime
+  role      RoleType?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+model Otp {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId()
+  email String @unique
+  otp   Int
+}
+
+model Account {
+  id           String              @id @default(auto()) @map("_id") @db.ObjectId()
+  isTrash      Boolean             @default(false)
+  provider     AccountProviderType
+  providerId   String
+  username     String
+  email        String?
+  mobileNumber String?
+  passwordHash String?
+  user         User                @relation(fields: [userId], references: [id])
+  userId       String              @db.ObjectId()
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@map("accounts")
+}
+
+model User {
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId()
+  isTrash          Boolean         @default(false)
+  email            String          @unique
+  firstName        String
+  lastName         String
+  address          String          @default("")
+  mobileNumber     String?         @unique
+  skills           String[]
+  bio              String?         @default("")
+  linkedin         String?         @default("")
+  facebook         String?         @default("")
+  twitter          String?         @default("")
+  role             RoleType
+  employeeStatus   EmployeeStatus? @relation(fields: [employeeStatusId], references: [id])
+  employeeStatusId String?         @db.ObjectId()
+  emailVerified    Boolean         @default(false)
+  image            Image?
+  sessions         Session[]
+  accounts         Account[]
+  interview        Interview[]
+  projects         Projects[]
+  assessMents      AssessMents[]   @relation(name: "assessMents", fields: [assessmentsId], references: [id])
+  assessmentsId    String[]        @db.ObjectId()
+  bookMarks        BookMarks[]
+  bookmarks        JobPosts[]      @relation(name: "bookmarks")
+  createpost       JobPosts[]      @relation(name: "createpost")
+  appliedJobs      AppliedJobs[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  Experience       Experience[]
+
+  @@map("users")
+}
+
+model EmployeeStatus {
+  id               String               @id @default(auto()) @map("_id") @db.ObjectId()
+  isTrash          Boolean              @default(false)
+  employmentStatus EmploymentStatusType
+  linkdinprofile   String
+  experience       Int
+  noticeperiod     String
+  User             User[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@map("employeeStatus")
+}
+
+model JobPosts {
+  id                       String               @id @default(auto()) @map("_id") @db.ObjectId()
+  jobId                    String               @unique
+  isTrash                  Boolean              @default(false)
+  title                    String
+  companyName              String               @unique
+  salary                   Float
+  type                     EmploymentStatusType
+  contract                 String
+  noticePeriod             String
+  openPosition             String
+  rolesAndResponsibilities String[]
+  projectRequirements      String[]
+  location                 String
+  experience               String
+  skills                   String[]
+  topSkills                String[]
+  interview                Interview[]
+  assessMents              AssessMents[]
+  appliedJobs              AppliedJobs[]
+  bookMarks                BookMarks[]
+  bookmarkuser             User?                @relation(name: "bookmarks", fields: [userId], references: [id])
+  userId                   String?              @db.ObjectId()
+  createpost               User?                @relation(name: "createpost", fields: [createpostId], references: [id])
+  createpostId             String?              @db.ObjectId()
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+
+  @@map("jobs")
+}
+
+model Interview {
+  id                String                @id @default(auto()) @map("_id") @db.ObjectId()
+  isTrash           Boolean               @default(false)
+  sheduleTime       String?
+  mode              String?               @default("online")
+  interviewerName   String?
+  interviewDuration String?
+  interviewFeedback String?
+  interviewStatus   InterviewStatusType? // Status of the interview (e.g., "scheduled," "completed," "cancelled")
+  interviewPlatform String?
+  interviewLink     String?
+  User              User?                 @relation(fields: [userId], references: [id])
+  userId            String?               @db.ObjectId()
+  JobPosts          JobPosts?             @relation(fields: [jobPostsId], references: [id])
+  jobPostsId        String?               @db.ObjectId()
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+}
+
+model Projects {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId()
+  isTrash     Boolean  @default(false)
+  title       String
+  description String
+  link        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      String?  @db.ObjectId()
+
+  @@map("projects")
+}
+
+model Experience {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId()
+  isTrash     Boolean  @default(false)
+  companyName String
+  jobType     String
+  experience  String
+  joinDate    String
+  endDate     String?
+  isPresent   Boolean?
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      String?  @db.ObjectId()
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("experience")
+}
+
+model AppliedJobs {
+  id               String               @id @default(auto()) @map("_id") @db.ObjectId()
+  isTrash          Boolean              @default(false)
+  appliedStatus    AppliedStatusType    @default(Applied)
+  assessmentStatus AssessmentStatusType @default(Pending)
+  interviewStatus  InterviewStatusType  @default(NotStrated)
+  skill            String[]
+  experience       String
+  about            String
+  image            Image?
+  user             User?                @relation(fields: [userId], references: [id])
+  userId           String?              @db.ObjectId()
+  jobPosts         JobPosts?            @relation(fields: [jobPostsId], references: [id])
+  jobPostsId       String?              @db.ObjectId()
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+}
+
+// model Interview {
+//   id      String  @id @default(auto()) @map("_id") @db.ObjectId()
+//   isTrash Boolean @default(false)
+// }
+
+model AssessMents {
+  id         String           @id @default(auto()) @map("_id") @db.ObjectId()
+  isTrash    Boolean          @default(false)
+  status     AssessMentsTypes @default(Pending)
+  endDate    String
+  link       String
+  User       User[]           @relation(name: "assessMents", fields: [userId], references: [id])
+  userId     String[]         @db.ObjectId()
+  JobPosts   JobPosts?        @relation(fields: [jobPostsId], references: [id])
+  jobPostsId String?          @db.ObjectId()
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@map("assessments")
+}
+
+model BookMarks {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId()
+  isTrash    Boolean   @default(false)
+  User       User?     @relation(fields: [userId], references: [id])
+  userId     String?   @db.ObjectId()
+  JobPosts   JobPosts? @relation(fields: [jobPostsId], references: [id])
+  jobPostsId String?   @db.ObjectId()
+}

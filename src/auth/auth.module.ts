@@ -1,35 +1,44 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { Otp, OtpSchema, UserSchema } from './schemas/auth.schema';
-import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { OtpService } from './otp.service';
+import { JwtStrategy } from './strategy/jwt.strategy';
+import { LocalStrategy } from './strategy/local.strategy';
+import { GoogleStrategy } from './strategy/google.strategy';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtGuard } from './guards/jwt.guard';
+import { JwtGuard } from './gaurd/jwt.guard';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentVariable } from 'src/utils/env.validation';
+import { UserService } from 'src/user/user.service';
+import { EmailService } from 'src/email/email.service';
 
 @Module({
-  imports:[ PassportModule.register({ defaultStrategy: 'jwt' }),
+  imports: [
     JwtModule.registerAsync({
+      useFactory: (config: ConfigService<EnvironmentVariable, true>) => ({
+        secret: config.getOrThrow('JWT_SECRET'),
+        signOptions: { expiresIn: '7d' },
+        verifyOptions: {
+          ignoreExpiration: false,
+        },
+      }),
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        return {
-          secret: config.get<string>('JWT_SECRET'),
-          signOptions: {
-            expiresIn: config.get<string | number>('JWT_EXPIRES'),
-          },
-        };
-      },
     }),
-    MongooseModule.forFeature([{ name: 'Users', schema: UserSchema }]),
-    MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }]),
+    PassportModule.register({ defaultStrategy: 'google' }),
   ],
-   
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    GoogleStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtGuard,
+    },
+    UserService,
+    EmailService,
+  ],
   controllers: [AuthController],
-  providers: [AuthService,JwtStrategy,OtpService,{provide:APP_GUARD,useClass:JwtGuard}],
-  exports:[JwtStrategy,PassportModule]
 })
 export class AuthModule {}
