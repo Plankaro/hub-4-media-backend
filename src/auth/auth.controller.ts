@@ -6,6 +6,7 @@ import {
   UseGuards,
   Req,
   Res,
+  Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -31,12 +32,12 @@ import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Get('google')
   // @Throttle({ default: { limit: 5, ttl: 30 * 1000 } })
   @UseGuards(AuthGuard('google'))
-  async googleAuth() {}
+  async googleAuth() { }
 
   @Get('google/callback')
   // @Throttle({ default: { limit: 5, ttl: 30 * 1000 } })
@@ -73,6 +74,12 @@ export class AuthController {
     @Body() body: VerifyEmailDto,
   ): Promise<void> {
     return this.authService.verifyEmail(body, res);
+  }
+
+  @ApiOkResponse({ type: SignedInUserDto })
+  @Post("/verify-user")
+  async verifyEmailToken(@Body() body: VerifyTokenDto, @Res() res: Response) {
+    return this.authService.verifyUserWithToken(body, res);
   }
 
   @Post('/sign-in')

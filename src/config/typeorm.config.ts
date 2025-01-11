@@ -4,12 +4,13 @@ import { config } from 'dotenv';
 import { User } from 'src/users/user.entity';
 import { UserOtp } from 'src/auth/user-otp.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { EnvironmentVariable } from 'src/utils/env.validation';
 config();
 
-const configService = new ConfigService();
+const configService = new ConfigService<EnvironmentVariable, true>();
 
 const commonTypeOrmConfig: DataSourceOptions = {
-  logging: true,
+  logging: configService.get("NODE_ENV") !== "production" ? true : false,
   type: 'postgres',
   entities: [User, UserOtp],
   synchronize: true,

@@ -132,13 +132,21 @@ export class AuthService {
     });
     const user = await this.userRepo.save(createdUser);
 
-    const { otp } = await this.otpService.createOtp(user);
+    // const { otp } = await this.otpService.createOtp(user);
 
     // Send otp
-    await this.emailService.sendOTPEmail(email, otp);
+    // await this.emailService.sendOTPEmail(email, otp);
+    // Send Verification Email
+    const { validationToken } = await this.tokenService.generateValidationToken(user);
+
+    const resetPasswordLink = `${this.configService.get(
+      'AUTH_UI_URL',
+    )}/verify?token=${validationToken}`;
+
+    await this.emailService.sendVerificationEmail(email, resetPasswordLink);
 
     return {
-      message: `You have been successfully registered! Please check your email ${email} for a otp`,
+      message: `You have been successfully registered! Please check your email ${email} for a verification `,
       email,
       userId: user.id,
     };
@@ -212,6 +220,55 @@ export class AuthService {
 
     await this.authenticateUser(user, res);
   }
+
+  async verifyUserWithToken({ verificationToken }: VerifyTokenDto, res: Response) {
+
+    try {
+
+      const { id: userId } = await this.tokenService.verifyToken(
+        verificationToken,
+        TokenType.VALIDATION,
+      );
+
+      const user = await this.usersService.findOne(userId);
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (user.isEmailVerified) {
+        throw new BadRequestException('User already verified');
+      }
+
+      const otherUserWithEmailVerified =
+        await this.usersService.findVerifiedAccountByEmail(user.email);
+
+      if (otherUserWithEmailVerified) {
+        throw new BadRequestException('Email already in use');
+      }
+
+      // const { otpDetails } = user;
+
+      // if (!otpDetails) {
+      //   throw new BadRequestException('No otp found');
+      // }
+
+      // await this.otpService.validateOtp(otp, otpDetails);
+
+      // await this.otpService.deleteOtp(otpDetails);
+
+      user.isEmailVerified = true;
+
+      await this.userRepo.save(user);
+
+      await this.authenticateUser(user, res);
+
+    } catch (error) {
+      console.log("🚀 ~ AuthService ~ verifyUserWithToken ~ error:", error)
+      throw new BadRequestException("Invalid token");
+    }
+  }
+
 
   /** @deprecated */
   async requestSignInLink({ email }: RequestSignInLinkDto) {
@@ -370,8 +427,7 @@ export class AuthService {
       throw new NotFoundException('User not found for given email');
     }
 
-    const { validationToken } =
-      await this.tokenService.generateValidationToken(user);
+    const { validationToken } = await this.tokenService.generateValidationToken(user);
 
     const resetPasswordLink = `${this.configService.get(
       'AUTH_UI_URL',

@@ -14,7 +14,7 @@ export class EmailService {
       });
 
       const info = await transporter.sendMail({
-        from: 'StackKaroo <mailt6486@gmail.com>',
+        from: 'Hub-4-Media <mailt6486@gmail.com>',
         to: toEmail,
         subject: 'Verification Code',
         html: `
@@ -48,14 +48,72 @@ export class EmailService {
       });
 
       const info = await transporter.sendMail({
-        from: 'StackKaroo <mailt6486@gmail.com>',
+        from: 'Hub-4-Media <mailt6486@gmail.com>',
         to: toEmail,
         subject: 'Verification Code',
         html: `
           <p>This Link is valid for a limited duration.</p>
   
           <p>Email: ${toEmail}</p>
+          <a href="${resetPasswordLink}" style="
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px auto;
+          ">Reset Password</a>
+
           <p>Reset Password Link: ${resetPasswordLink}</p>
+  
+          <p>Thank you for your co-operation.</p>
+        `,
+      });
+
+      console.log('Email sent successfully:', info.messageId);
+      return resetPasswordLink;
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  }
+
+  async sendVerificationEmail(
+    toEmail: string,
+    resetPasswordLink: string,
+  ): Promise<any> {
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'mailt6486@gmail.com',
+          pass: process.env.APP_PASSWORD,
+        },
+      });
+
+      const info = await transporter.sendMail({
+        from: 'Hub-4-Media <mailt6486@gmail.com>',
+        to: toEmail,
+        subject: 'Verification Email',
+        html: `
+          <p>This Link is valid for a limited duration.</p>
+  
+          <p>Email: ${toEmail}</p>
+         <a href="${resetPasswordLink}" style="
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px auto;
+          ">Verify</a>
+
+          <p> Click to Verify: ${resetPasswordLink}</p>
   
           <p>Thank you for your co-operation.</p>
         `,

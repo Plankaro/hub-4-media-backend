@@ -21,12 +21,13 @@ const logger = new Logger('Main');
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.enableCors({
-    // origin: process.env.UI_BASE_URL,
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
+  // app.enableCors({
+  //   // origin: process.env.UI_BASE_URL,
+  //   origin: '*',
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  //   credentials: true,
+  // });
+  app.enableCors()
 
   app.use(cookieParser());
   app.use(json({ limit: '50mb' }));
