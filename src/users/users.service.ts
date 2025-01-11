@@ -108,7 +108,9 @@ export class UsersService {
       user.email ===
       this.configService.getOrThrow<string>('PRIMARY_ADMIN_EMAIL')
     ) {
-      throw new BadRequestException('Cannot change the role of primary admin');
+      throw new BadRequestException(
+        'Cannot change the role of primary super admin',
+      );
     }
 
     user.role = role;

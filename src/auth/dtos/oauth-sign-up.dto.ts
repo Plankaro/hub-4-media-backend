@@ -9,7 +9,4 @@ export class OAuthSignUpDto {
 
   @IsString()
   lastName: string;
-
-  @IsString()
-  profileImageUrl: string;
 }

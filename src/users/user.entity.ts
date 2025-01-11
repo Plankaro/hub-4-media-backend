@@ -20,6 +20,10 @@ export class User {
 
   @ApiProperty()
   @Column()
+  username: string;
+
+  @ApiProperty()
+  @Column()
   email: string;
 
   @ApiProperty()
@@ -49,14 +53,6 @@ export class User {
   @ApiProperty()
   @Column({ default: '' })
   lastName: string;
-
-  @ApiProperty()
-  @Column({ default: '', nullable: true })
-  profileImagePublicId: string;
-
-  @ApiProperty()
-  @Column({ default: '', nullable: true })
-  profileImagePublicUrl: string;
 
   @ApiProperty()
   @Column({ default: 'NA', nullable: true })

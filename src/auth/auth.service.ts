@@ -61,18 +61,11 @@ export class AuthService {
   }
 
   async oAuthSignUp(
-    { email, firstName, lastName, profileImageUrl }: OAuthSignUpDto,
+    { email, firstName, lastName }: OAuthSignUpDto,
     { providerAuthId, provider }: AuthProviderDto,
   ) {
     const existingUser =
       await this.usersService.findVerifiedAccountByEmail(email);
-
-    if (existingUser) {
-      if (existingUser.profileImagePublicUrl !== profileImageUrl) {
-        existingUser.profileImagePublicUrl = profileImageUrl;
-        this.userRepo.save(existingUser);
-      }
-    }
 
     if (existingUser) {
       const { validationToken } =
@@ -88,7 +81,10 @@ export class AuthService {
 
     const hashedPassword = await hashPassword(generatedPassword);
 
+    const username = `${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
+
     const createdUser = this.userRepo.create({
+      username,
       email,
       password: hashedPassword,
       provider,
@@ -110,7 +106,13 @@ export class AuthService {
     return { redirectUrl };
   }
 
-  async signUp({ email, password }: SignUpUserDto) {
+  async signUp({
+    username,
+    firstName,
+    lastName,
+    email,
+    password,
+  }: SignUpUserDto) {
     const existingUser =
       await this.usersService.findVerifiedAccountByEmail(email);
 
@@ -121,6 +123,9 @@ export class AuthService {
     const hashedPassword = await hashPassword(password);
 
     const createdUser = this.userRepo.create({
+      username,
+      firstName,
+      lastName,
       email,
       password: hashedPassword,
     });
