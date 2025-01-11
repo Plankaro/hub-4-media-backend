@@ -40,18 +40,18 @@ export class HomePageController {
     return this.homePageService.addHeroHeadlines(body);
   }
 
-  @ApiOkResponse({ type: HeroHeadings })
-  @Put('/hero-headings/:id')
-  updateHeroHeadings(
-    @Param('id') id: string,
-    @Body() body: HeroHeadingsDto,
-  ): Promise<HeroHeadings> {
-    return this.homePageService.updateHeroHeadings(id, body);
-  }
+  // @ApiOkResponse({ type: HeroHeadings })
+  // @Put('/hero-headings/:id')
+  // updateHeroHeadings(
+  //   @Param('id') id: string,
+  //   @Body() body: HeroHeadingsDto,
+  // ): Promise<HeroHeadings> {
+  //   return this.homePageService.updateHeroHeadings(id, body);
+  // }
 
   @ApiOkResponse({ type: HeroHeadings })
   @Get('/hero-headings')
-  getHeroHeadings(): Promise<HeroHeadings[]> {
+  getHeroHeadings(): Promise<HeroHeadings> {
     return this.homePageService.getHeroHeadings();
   }
 

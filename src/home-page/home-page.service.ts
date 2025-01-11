@@ -73,48 +73,64 @@ export class HomePageService {
     secondHeading,
     thirdHeading,
   }: HeroHeadingsDto) {
-    const heroHeading = this.heroHeadingsRepo.create({
-      firstHeading,
-      secondHeading,
-      thirdHeading,
-    });
+    // const heroHeading = this.heroHeadingsRepo.create({
+    //   firstHeading,
+    //   secondHeading,
+    //   thirdHeading,
+    // });
 
-    return this.heroHeadingsRepo.save(heroHeading);
+    // return this.heroHeadingsRepo.save(heroHeading);
+
+    return await this.heroHeadingsRepo.manager.transaction(
+      async (transactionalEntityManager) => {
+        // Delete all entries
+        await transactionalEntityManager.delete(HeroHeadings, {});
+
+        // Create and save new entry
+        const heroHeading = this.heroHeadingsRepo.create({
+          firstHeading,
+          secondHeading,
+          thirdHeading,
+        });
+
+        return transactionalEntityManager.save(heroHeading);
+      },
+    );
   }
 
-  async updateHeroHeadings(
-    id: string,
-    { firstHeading, secondHeading, thirdHeading }: HeroHeadingsDto,
-  ): Promise<HeroHeadings> {
-    try {
-      const heroHeadings = await this.heroHeadingsRepo.findOne({
-        where: { id },
-      });
+  // async updateHeroHeadings(
+  //   id: string,
+  //   { firstHeading, secondHeading, thirdHeading }: HeroHeadingsDto,
+  // ): Promise<HeroHeadings> {
+  //   try {
+  //     const heroHeadings = await this.heroHeadingsRepo.findOne({
+  //       where: { id },
+  //     });
 
-      if (!heroHeadings) {
-        throw new NotFoundException(`No Headings found with id: ${id}`);
-      }
+  //     if (!heroHeadings) {
+  //       throw new NotFoundException(`No Headings found with id: ${id}`);
+  //     }
 
-      heroHeadings.firstHeading = firstHeading;
-      heroHeadings.secondHeading = secondHeading;
-      heroHeadings.thirdHeading = thirdHeading;
+  //     heroHeadings.firstHeading = firstHeading;
+  //     heroHeadings.secondHeading = secondHeading;
+  //     heroHeadings.thirdHeading = thirdHeading;
 
-      // Success response
-      return this.heroHeadingsRepo.save(heroHeadings);
-    } catch (error) {
-      console.log(`Error while updating home page heading: ${error}`);
-      throw new InternalServerErrorException();
-    }
-  }
+  //     // Success response
+  //     return this.heroHeadingsRepo.save(heroHeadings);
+  //   } catch (error) {
+  //     console.log(`Error while updating home page heading: ${error}`);
+  //     throw new InternalServerErrorException();
+  //   }
+  // }
 
-  async getHeroHeadings(): Promise<HeroHeadings[]> {
+  async getHeroHeadings(): Promise<HeroHeadings> {
     const heroHeading = await this.heroHeadingsRepo.find();
 
     if (!heroHeading) {
       throw new NotFoundException('Hero heading not found');
     }
 
-    return heroHeading;
+    return heroHeading[0];
   }
 
   async addHowItWorks({ title, description }: HowItWorksDto) {
