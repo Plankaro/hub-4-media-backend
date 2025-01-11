@@ -12,7 +12,7 @@ const commonTypeOrmConfig: DataSourceOptions = {
   logging: true,
   type: 'postgres',
   entities: [User, UserOtp],
-  synchronize: false,
+  synchronize: true,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {

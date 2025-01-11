@@ -108,7 +108,7 @@ export class EnvironmentVariable {
   EMAIL_MICROSERVICE_PORT: number;
 
   // Auth Api Url 
-  @IsUrl()
+  @IsString()
   @IsNotEmpty()
   AUTH_UI_URL: string;
 
