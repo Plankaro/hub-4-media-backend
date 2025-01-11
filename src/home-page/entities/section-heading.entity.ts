@@ -14,8 +14,8 @@ export class SectionHeadings {
   id: string;
 
   @ApiProperty()
-  @Column({ nullable: true })
-  sectionName?: string;
+  @Column()
+  sectionName: string;
 
   @ApiProperty()
   @Column()

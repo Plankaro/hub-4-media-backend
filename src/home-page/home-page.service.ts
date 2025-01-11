@@ -20,6 +20,7 @@ import {
 import { Repository } from 'typeorm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import {
+  ContactDto,
   HeroHeadingsDto,
   HowItWorksDto,
   OfferHeadingsDto,
@@ -27,6 +28,7 @@ import {
 } from './dto';
 import { PricePlanDto } from './dto/price-plan.dto';
 import { SuccessMessageDto } from 'src/auth/dtos';
+import { UserEnquiryDto } from './dto/user-enquiry.dto';
 
 @Injectable()
 export class HomePageService {
@@ -174,12 +176,43 @@ export class HomePageService {
     return howItWorks[0];
   }
 
+  async deletehowItWorks(id: string): Promise<SuccessMessageDto> {
+    try {
+      const deletedHowItWorks = await this.howItWorksRepo.findOne({
+        where: { id },
+      });
+
+      if (!deletedHowItWorks) {
+        throw new NotFoundException(`No How it works found with id: ${id}`);
+      }
+
+      await this.howItWorksRepo.softDelete({ id });
+
+      return { message: 'Deleted Successfully' };
+    } catch (error) {
+      console.log(`Error while deleting howw it works with id: ${id}`, error);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async addSectionHeadings({
     heading,
     sectionName,
     subheading,
   }: SectionHeadingDto): Promise<SectionHeadings> {
     try {
+      const existingSectionHeading = await this.sectionHeadingsRepo.findOne({
+        where: { sectionName },
+      });
+
+      if (existingSectionHeading) {
+        existingSectionHeading.heading = heading;
+        existingSectionHeading.subheading = subheading;
+        existingSectionHeading.sectionName = sectionName;
+
+        return this.sectionHeadingsRepo.save(existingSectionHeading);
+      }
+
       const sectionheadings = this.sectionHeadingsRepo.create({
         heading,
         sectionName,
@@ -194,27 +227,29 @@ export class HomePageService {
   }
 
   async updateSectionHeadings(
-    id: string,
-    { heading, sectionName, subheading }: SectionHeadingDto,
+    sectionName: string,
+    { heading, subheading }: SectionHeadingDto,
   ): Promise<SectionHeadings> {
     try {
       const sectionHeadings = await this.sectionHeadingsRepo.findOne({
-        where: { id },
+        where: { sectionName },
       });
 
       if (!sectionHeadings) {
         throw new NotFoundException(
-          `Section Headings is not found with id: ${id} `,
+          `Section Headings is not found with section name: ${sectionName} `,
         );
       }
 
       sectionHeadings.heading = heading;
-      sectionHeadings.sectionName = sectionName;
       sectionHeadings.subheading = subheading;
 
       return this.sectionHeadingsRepo.save(sectionHeadings);
     } catch (error) {
-      console.log(`Error updating section headings with id: ${id}`, error);
+      console.log(
+        `Error updating section headings with section Name: ${sectionName}`,
+        error,
+      );
       throw new InternalServerErrorException();
     }
   }
@@ -391,26 +426,74 @@ export class HomePageService {
     }
   }
 
-  // async createContactDetail(createContactDto: CreateUserDto): Promise<any> {
-  //   const createdContact = new this.contactDetailModel(createContactDto);
-  //   await createdContact.save();
-  //   return { success: true, message: 'Contact details saved successfully' };
-  // }
+  // First Delete previous contact details and then save new one ( In transaction)
+  async createContactDetails({
+    phonNumber,
+    extraPhonNumber,
+    email,
+    extraEmail,
+    address,
+    googelMapLocation,
+    img,
+    imgPublicID,
+  }: ContactDto): Promise<ContactDetails> {
+    return await this.contactDetailsRepo.manager.transaction(
+      async (transactionalEntityManager) => {
+        // Delete all entries
+        await transactionalEntityManager.delete(ContactDetails, {});
 
-  // async getContactDetails(): Promise<any> {
-  //   try {
-  //     const contacts = await this.contactDetailModel.find().exec();
+        // Create and save new entry
+        const contactDetails = this.contactDetailsRepo.create({
+          phonNumber,
+          extraPhonNumber,
+          email,
+          extraEmail,
+          address,
+          googelMapLocation,
+          img,
+          imgPublicID,
+        });
 
-  //     return {
-  //       success: true,
-  //       message: 'Contact details retrieved successfully',
-  //       data: contacts,
-  //     };
-  //   } catch (error) {
-  //     return { success: false, message: 'Failed to retrieve contact details' };
-  //   }
-  // }
+        return transactionalEntityManager.save(contactDetails);
+      },
+    );
+  }
 
+  async getContactDetails(): Promise<ContactDetails> {
+    try {
+      const contacts = await this.contactDetailsRepo.find();
+
+      return contacts[0];
+    } catch (error) {
+      console.log(`Error get contact details`, error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async userEquiry({
+    name,
+    mobile,
+    message,
+    email,
+  }: UserEnquiryDto): Promise<UserEnquiry> {
+    try {
+      const enquiry = this.userEnquiryRepo.create({
+        name,
+        mobile,
+        message,
+        email,
+      });
+
+      return this.userEnquiryRepo.save(enquiry);
+    } catch (error) {
+      console.log('Error saving user enquiry', error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async getAllUserEnquiries(): Promise<UserEnquiry[]> {
+    return this.userEnquiryRepo.find();
+  }
   // async updateContactDetail(
   //   id: string,
   //   updateContactDto: Partial<CreateUserDto>,

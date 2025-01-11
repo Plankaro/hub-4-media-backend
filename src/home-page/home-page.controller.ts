@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 // import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ContactDto,
   // ContactDto,
   HeroHeadingsDto,
   HowItWorksDto,
@@ -20,15 +21,18 @@ import {
 } from './dto';
 import { HomePageService } from './home-page.service';
 import {
+  ContactDetails,
   HeroHeadings,
   HowItWorks,
   OfferHeadings,
   Plans,
   SectionHeadings,
+  UserEnquiry,
 } from './entities';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { SectionHeadingDto } from './dto/section-headings.dto';
 import { PricePlanDto } from './dto/price-plan.dto';
+import { UserEnquiryDto } from './dto/user-enquiry.dto';
 
 @Controller('home')
 export class HomePageController {
@@ -55,6 +59,8 @@ export class HomePageController {
     return this.homePageService.getHeroHeadings();
   }
 
+  // Above all is correct
+
   @ApiOkResponse({ type: HowItWorks })
   @Post('/how-it-work')
   postHowItWorks(@Body() body: HowItWorksDto): Promise<HowItWorks> {
@@ -76,6 +82,12 @@ export class HomePageController {
     return this.homePageService.getHowItWork();
   }
 
+  @ApiOkResponse({ type: SuccessMessageDto })
+  @Delete('how-it-works/:id')
+  async deletehowItWorks(@Param('id') id: string): Promise<SuccessMessageDto> {
+    return this.homePageService.deletehowItWorks(id);
+  }
+
   @ApiOkResponse({ type: SectionHeadings })
   @Post('/section-headings')
   async addSectionHeadings(
@@ -85,12 +97,12 @@ export class HomePageController {
   }
 
   @ApiOkResponse({ type: SectionHeadings })
-  @Put('/section-headings/:id')
+  @Put('/section-headings/:sectionName')
   async updateAddHeadings(
-    @Param('id') id: string,
+    @Param('sectionName') sectionName: string,
     @Body() body: SectionHeadingDto,
   ): Promise<SectionHeadings> {
-    return this.homePageService.updateSectionHeadings(id, body);
+    return this.homePageService.updateSectionHeadings(sectionName, body);
   }
 
   @ApiOkResponse({ type: SectionHeadings })
@@ -165,17 +177,17 @@ export class HomePageController {
     return this.homePageService.deleteOfferHeadings(id);
   }
 
-  // @ApiCreatedResponse({ type: ContactDetails })
-  // @Post('contact')
-  // async createContact(@Body() body: ContactDto): Promise<ContactDetails> {
-  //   return await this.homePageService.createContactDetail(body);
-  // }
+  @ApiCreatedResponse({ type: ContactDetails })
+  @Post('contact')
+  async createContact(@Body() body: ContactDto): Promise<ContactDetails> {
+    return await this.homePageService.createContactDetails(body);
+  }
 
-  // @ApiOkResponse({ type: ContactDetails })
-  // @Get('contacts')
-  // async getContacts() {
-  //   return await this.homePageService.getContactDetails();
-  // }
+  @ApiOkResponse({ type: ContactDetails })
+  @Get('contacts')
+  async getContacts() {
+    return await this.homePageService.getContactDetails();
+  }
 
   // @Put('contact/:id')
   // // @UseInterceptors(FileInterceptor('file'))
@@ -191,10 +203,17 @@ export class HomePageController {
   //   );
   // }
 
-  // @Post('post-user-enquery-data')
-  // async submitForm(@Body() formDto: CreateUserDto) {
-  //   return await this.homePageService.submitForm(formDto);
-  // }
+  @ApiCreatedResponse({ type: UserEnquiry })
+  @Post('user-inquiry')
+  async userEnquiry(@Body() body: UserEnquiryDto) {
+    return await this.homePageService.userEquiry(body);
+  }
+
+  @ApiOkResponse({ type: [UserEnquiry] })
+  @Get('/user-enquiries')
+  getAllUserEnquiries(): Promise<UserEnquiry[]> {
+    return this.homePageService.getAllUserEnquiries();
+  }
 
   // @Post('add-aboutourcompany')
   // async submitAbout(

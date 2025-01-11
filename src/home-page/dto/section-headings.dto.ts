@@ -14,3 +14,13 @@ export class SectionHeadingDto {
   @IsString()
   subheading?: string;
 }
+
+export class updateSectionHeadingsDto {
+  @ApiProperty()
+  @IsString()
+  heading: string;
+
+  @ApiProperty()
+  @IsString()
+  subheading?: string;
+}
