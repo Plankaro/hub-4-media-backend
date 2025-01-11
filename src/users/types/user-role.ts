@@ -1,0 +1,6 @@
+export enum UserRole {
+  EXTERNAL_USER = 'EXTERNAL_USER',
+  PROVIDER = 'PROVIDER',
+  ADMIN = 'ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+}

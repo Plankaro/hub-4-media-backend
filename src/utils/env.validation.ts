@@ -28,9 +28,9 @@ export class EnvironmentVariable {
   @IsNotEmpty()
   PORT: number;
 
-  @IsUrl({ protocols: ['mongodb+srv'] })
+  @IsUrl({ protocols: ['postgres'] })
   @IsNotEmpty()
-  DATABASE_URL: string;
+  DB_URL: string;
 
   @IsNotEmpty()
   JWT_SECRET: string;
