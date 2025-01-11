@@ -33,6 +33,7 @@ export class HomePageService {
   constructor(
     @InjectRepository(HeroHeadings)
     private heroHeadingsRepo: Repository<HeroHeadings>,
+
     @InjectRepository(HowItWorks)
     private howItWorksRepo: Repository<HowItWorks>,
 

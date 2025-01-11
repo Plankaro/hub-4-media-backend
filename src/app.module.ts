@@ -10,6 +10,7 @@ import { getTypeOrmConfig } from './config/typeorm.config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UsersModule } from './users/users.module';
 import { validate } from './utils/env.validation';
+import { HomePageModule } from './home-page/home-page.module';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { validate } from './utils/env.validation';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [`.env`, `.env.local`, `.env.production`],
-      validate
+      validate,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -35,8 +36,9 @@ import { validate } from './utils/env.validation';
     UsersModule,
     CloudinaryModule,
     EmailModule,
+    HomePageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

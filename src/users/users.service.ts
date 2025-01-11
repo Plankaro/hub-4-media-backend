@@ -32,6 +32,10 @@ export class UsersService {
     });
   }
 
+  findAccountByEmail(email: string) {
+    return this.repo.findOne({ where: { email } });
+  }
+
   findVerifiedAccountByEmail(email: string, withOtp?: boolean) {
     return this.repo.findOne({
       where: { email, isEmailVerified: true },

@@ -114,8 +114,7 @@ export class AuthService {
     email,
     password,
   }: SignUpUserDto) {
-    const existingUser =
-      await this.usersService.findVerifiedAccountByEmail(email);
+    const existingUser = await this.usersService.findAccountByEmail(email);
 
     if (existingUser) {
       throw new BadRequestException('Email already in use');
@@ -153,9 +152,10 @@ export class AuthService {
     };
   }
 
-  async resendVerificationEmail({ userId, email }: ResendVerificationEmailDto) {
-    const existingUser = await this.usersService.findOne(userId, true);
+  async resendVerificationEmail({ email }: ResendVerificationEmailDto) {
+    // const existingUser = await this.usersService.findOne(email, true);
 
+    const existingUser = await this.userRepo.findOne({ where: { email } });
     if (!existingUser) {
       throw new NotFoundException('User not found');
     }
@@ -172,16 +172,25 @@ export class AuthService {
       );
     }
 
-    if (existingUser.otpDetails) {
-      await this.otpService.deleteOtp(existingUser.otpDetails);
-    }
+    // if (existingUser.otpDetails) {
+    //   await this.otpService.deleteOtp(existingUser.otpDetails);
+    // }
 
-    const { otp } = await this.otpService.createOtp(existingUser);
+    // const { otp } = await this.otpService.createOtp(existingUser);
 
-    await this.emailService.sendOTPEmail(email, otp);
+    // await this.emailService.sendOTPEmail(email, otp);
+
+    const { validationToken } =
+      await this.tokenService.generateValidationToken(existingUser);
+
+    const resetPasswordLink = `${this.configService.get(
+      'AUTH_UI_URL',
+    )}/verify?token=${validationToken}`;
+
+    await this.emailService.sendVerificationEmail(email, resetPasswordLink);
 
     return {
-      message: `We have resent the otp! Please check your email ${email} for a otp`,
+      message: `You have been successfully registered! Please check your email ${email} for a verification`,
       email,
       userId: existingUser.id,
     };

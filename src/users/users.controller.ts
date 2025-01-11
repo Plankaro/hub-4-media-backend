@@ -29,9 +29,9 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @ApiOkResponse({ type: ProfileDto })
-  @Get('/whoami')
+  @Get('/')
   @UseGuards(AuthGuard())
-  whoAmI(@CurrentUser() user: User) {
+  getUser(@CurrentUser() user: User) {
     return { user };
   }
 
