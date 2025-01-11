@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { SectionName } from '../types/section-name.enum';
 
 @Entity()
 export class SectionHeadings {
@@ -13,9 +14,9 @@ export class SectionHeadings {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ApiProperty()
-  @Column()
-  sectionName: string;
+  @ApiProperty({ enum: SectionName, enumName: 'SectionName' })
+  @Column('enum', { enum: SectionName })
+  sectionName: SectionName;
 
   @ApiProperty()
   @Column()

@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
+import { SectionName } from '../types/section-name.enum';
 
 export class SectionHeadingDto {
-  @ApiProperty()
-  @IsString()
-  sectionName?: string;
+  @ApiProperty({ enum: SectionName, enumName: 'SectionName' })
+  @IsEnum(SectionName)
+  sectionName: SectionName;
 
   @ApiProperty()
   @IsString()

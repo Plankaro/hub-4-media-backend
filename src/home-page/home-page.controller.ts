@@ -33,6 +33,7 @@ import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { SectionHeadingDto } from './dto/section-headings.dto';
 import { PricePlanDto } from './dto/price-plan.dto';
 import { UserEnquiryDto } from './dto/user-enquiry.dto';
+import { SectionName } from './types/section-name.enum';
 
 @Controller('home')
 export class HomePageController {
@@ -99,7 +100,7 @@ export class HomePageController {
   @ApiOkResponse({ type: SectionHeadings })
   @Put('/section-headings/:sectionName')
   async updateAddHeadings(
-    @Param('sectionName') sectionName: string,
+    @Param('sectionName') sectionName: SectionName,
     @Body() body: SectionHeadingDto,
   ): Promise<SectionHeadings> {
     return this.homePageService.updateSectionHeadings(sectionName, body);

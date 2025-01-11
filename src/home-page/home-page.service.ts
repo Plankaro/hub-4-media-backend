@@ -29,6 +29,7 @@ import {
 import { PricePlanDto } from './dto/price-plan.dto';
 import { SuccessMessageDto } from 'src/auth/dtos';
 import { UserEnquiryDto } from './dto/user-enquiry.dto';
+import { SectionName } from './types/section-name.enum';
 
 @Injectable()
 export class HomePageService {
@@ -227,7 +228,7 @@ export class HomePageService {
   }
 
   async updateSectionHeadings(
-    sectionName: string,
+    sectionName: SectionName,
     { heading, subheading }: SectionHeadingDto,
   ): Promise<SectionHeadings> {
     try {
@@ -264,7 +265,9 @@ export class HomePageService {
     }
   }
 
-  async getSectionHeadingByName(sectionName: string): Promise<SectionHeadings> {
+  async getSectionHeadingByName(
+    sectionName: SectionName,
+  ): Promise<SectionHeadings> {
     try {
       const data = await this.sectionHeadingsRepo.findOne({
         where: { sectionName },
