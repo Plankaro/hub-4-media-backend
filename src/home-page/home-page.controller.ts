@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 // import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  ContactDto,
   // ContactDto,
   HeroHeadingsDto,
   HowItWorksDto,
@@ -21,7 +20,6 @@ import {
 } from './dto';
 import { HomePageService } from './home-page.service';
 import {
-  ContactDetails,
   HeroHeadings,
   HowItWorks,
   OfferHeadings,
@@ -178,18 +176,6 @@ export class HomePageController {
     return this.homePageService.deleteOfferHeadings(id);
   }
 
-  @ApiCreatedResponse({ type: ContactDetails })
-  @Post('contact')
-  async createContact(@Body() body: ContactDto): Promise<ContactDetails> {
-    return await this.homePageService.createContactDetails(body);
-  }
-
-  @ApiOkResponse({ type: ContactDetails })
-  @Get('contacts')
-  async getContacts() {
-    return await this.homePageService.getContactDetails();
-  }
-
   // @Put('contact/:id')
   // // @UseInterceptors(FileInterceptor('file'))
   // async updateContact(
@@ -204,6 +190,7 @@ export class HomePageController {
   //   );
   // }
 
+  // Also Sed emmail to user for successful enquiry
   @ApiCreatedResponse({ type: UserEnquiry })
   @Post('user-inquiry')
   async userEnquiry(@Body() body: UserEnquiryDto) {

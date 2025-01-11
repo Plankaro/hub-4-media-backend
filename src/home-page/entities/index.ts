@@ -6,6 +6,6 @@ export { WhyChooseUs } from './why-choose-us.entity';
 export { OurThreePrinciples } from './our-three-principles.entity';
 export { AboutOurCompany } from './about-our-company.entity';
 export { UserEnquiry } from './user-enquiry.entity';
-export { ContactDetails } from './contact-details.entity';
+export { ContactDetails } from '../../contact-us-page/contact-details.entity';
 export { OfferHeadings } from './offer-headings.entity';
 export { Plans } from './plans.entity';

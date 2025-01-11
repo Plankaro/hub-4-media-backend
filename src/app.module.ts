@@ -11,6 +11,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { UsersModule } from './users/users.module';
 import { validate } from './utils/env.validation';
 import { HomePageModule } from './home-page/home-page.module';
+import { ContactUsPageModule } from './contact-us-page/contact-us.module';
+import { ServicePageModule } from './service-page/service.module';
+import { AboutUsPageModule } from './about-us-page/about-us.module';
 
 @Module({
   imports: [
@@ -37,6 +40,9 @@ import { HomePageModule } from './home-page/home-page.module';
     CloudinaryModule,
     EmailModule,
     HomePageModule,
+    ContactUsPageModule,
+    ServicePageModule,
+    AboutUsPageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

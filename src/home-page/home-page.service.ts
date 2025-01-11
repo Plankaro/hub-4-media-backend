@@ -6,7 +6,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   AboutOurCompany,
-  ContactDetails,
   HeroHeadings,
   HowItWorks,
   OfferHeadings,
@@ -20,7 +19,6 @@ import {
 import { Repository } from 'typeorm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import {
-  ContactDto,
   HeroHeadingsDto,
   HowItWorksDto,
   OfferHeadingsDto,
@@ -48,9 +46,6 @@ export class HomePageService {
 
     @InjectRepository(OfferHeadings)
     private offerHeadingsRepo: Repository<OfferHeadings>,
-
-    @InjectRepository(ContactDetails)
-    private contactDetailsRepo: Repository<ContactDetails>,
 
     @InjectRepository(UserEnquiry)
     private userEnquiryRepo: Repository<UserEnquiry>,
@@ -425,50 +420,6 @@ export class HomePageService {
       return { message: 'Deleted Successfully' };
     } catch (error) {
       console.log(`Error deleting offer heading with id: ${id}`, error);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  // First Delete previous contact details and then save new one ( In transaction)
-  async createContactDetails({
-    phonNumber,
-    extraPhonNumber,
-    email,
-    extraEmail,
-    address,
-    googelMapLocation,
-    img,
-    imgPublicID,
-  }: ContactDto): Promise<ContactDetails> {
-    return await this.contactDetailsRepo.manager.transaction(
-      async (transactionalEntityManager) => {
-        // Delete all entries
-        await transactionalEntityManager.delete(ContactDetails, {});
-
-        // Create and save new entry
-        const contactDetails = this.contactDetailsRepo.create({
-          phonNumber,
-          extraPhonNumber,
-          email,
-          extraEmail,
-          address,
-          googelMapLocation,
-          img,
-          imgPublicID,
-        });
-
-        return transactionalEntityManager.save(contactDetails);
-      },
-    );
-  }
-
-  async getContactDetails(): Promise<ContactDetails> {
-    try {
-      const contacts = await this.contactDetailsRepo.find();
-
-      return contacts[0];
-    } catch (error) {
-      console.log(`Error get contact details`, error);
       throw new InternalServerErrorException();
     }
   }
