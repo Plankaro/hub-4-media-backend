@@ -115,7 +115,7 @@ export class HomePageController {
   @ApiOkResponse({ type: SectionHeadings })
   @Get('/section-heading/:sectionName')
   async getSectionHeadingByName(
-    @Param('sectionName') sectionName: string,
+    @Param('sectionName') sectionName: SectionName,
   ): Promise<SectionHeadings> {
     return this.homePageService.getSectionHeadingByName(sectionName);
   }
