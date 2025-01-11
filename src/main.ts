@@ -21,12 +21,13 @@ const logger = new Logger('Main');
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.enableCors({
-    // origin: process.env.UI_BASE_URL,
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
+  // app.enableCors({
+  //   // origin: process.env.UI_BASE_URL,
+  //   origin: '*',
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  //   credentials: true,
+  // });
+  app.enableCors();
 
   app.use(cookieParser());
   app.use(json({ limit: '50mb' }));
@@ -43,15 +44,11 @@ async function bootstrap() {
 
   app.setGlobalPrefix(globalPrefix);
 
-
-
   if (config.get('NODE_ENV') !== 'production') {
     createSwaggerDocument(app);
   }
 
-
   await app.listen(port);
-
 }
 
 const start = Date.now();
@@ -59,7 +56,8 @@ bootstrap().then(() => {
   const end = Date.now();
   logger.log(`🚀 Application started in ${yellow(end - start + 'ms')}`);
   logger.log(
-    `🚀 ${config.get('NODE_ENV') || 'development'
+    `🚀 ${
+      config.get('NODE_ENV') || 'development'
     } is running on: http://localhost:${port}/${globalPrefix} 🚀🚀`,
   );
 });

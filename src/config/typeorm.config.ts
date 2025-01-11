@@ -17,12 +17,13 @@ import {
   OfferHeadings,
   Plans,
 } from 'src/home-page/entities';
+import { EnvironmentVariable } from 'src/utils/env.validation';
 config();
 
-const configService = new ConfigService();
+const configService = new ConfigService<EnvironmentVariable, true>();
 
 const commonTypeOrmConfig: DataSourceOptions = {
-  logging: true,
+  logging: configService.get('NODE_ENV') !== 'production' ? true : false,
   type: 'postgres',
   entities: [
     User,

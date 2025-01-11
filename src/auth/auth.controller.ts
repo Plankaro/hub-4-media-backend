@@ -75,6 +75,12 @@ export class AuthController {
     return this.authService.verifyEmail(body, res);
   }
 
+  @ApiOkResponse({ type: SignedInUserDto })
+  @Post('/verify-user')
+  async verifyEmailToken(@Body() body: VerifyTokenDto, @Res() res: Response) {
+    return this.authService.verifyUserWithToken(body, res);
+  }
+
   @Post('/sign-in')
   // @Throttle({ default: { limit: 5, ttl: 30 * 1000 } })
   @ApiOkResponse({ type: SignedInUserDto })
