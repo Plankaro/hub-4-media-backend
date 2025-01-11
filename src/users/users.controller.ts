@@ -6,6 +6,7 @@ import {
   Put,
   Query,
   Param,
+  Res,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -23,6 +24,7 @@ import { AbilityGuard } from '../ability/ability.guard';
 import { CheckAbilities } from '../ability/ability.decorator';
 import { Action } from '../ability/ability.factory';
 import { PaginationDto } from '../common/dtos';
+import { Response } from 'express';
 
 @Controller('user')
 export class UsersController {
@@ -31,8 +33,8 @@ export class UsersController {
   @ApiOkResponse({ type: ProfileDto })
   @Get('/')
   @UseGuards(AuthGuard())
-  getUser(@CurrentUser() user: User): Promise<ProfileDto> {
-    return this.usersService.getSafeUserById(user.id);
+  getUser(@CurrentUser() user: User, @Res() res: Response): Promise<void> {
+    return this.usersService.getSafeUserById(user.id, res);
   }
 
   @Put('/onboard')

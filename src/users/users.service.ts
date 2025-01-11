@@ -6,18 +6,14 @@ import {
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
-import {
-  ChangeUserRoleDto,
-  EditProfileDto,
-  OnboardDto,
-  ProfileDto,
-} from './dtos';
+import { ChangeUserRoleDto, EditProfileDto, OnboardDto } from './dtos';
 import { hashPassword } from './utils/generate-password';
 import { UserWithCount } from './dtos/all-users.dto';
 import { ConfigService } from '@nestjs/config';
 import { getPaginationMeta } from '../common/utility';
 import { PaginationDto } from '../common/dtos';
 import { instanceToPlain } from 'class-transformer';
+import { Response } from 'express';
 
 @Injectable()
 export class UsersService {
@@ -26,10 +22,11 @@ export class UsersService {
     private configService: ConfigService,
   ) {}
 
-  async getSafeUserById(id: string): Promise<ProfileDto> {
+  async getSafeUserById(id: string, res: Response): Promise<void> {
     const user = await this.repo.findOne({ where: { id } });
 
-    return instanceToPlain(user);
+    const safeUser = instanceToPlain(user);
+    res.json({ user: safeUser });
   }
 
   findOne(id: string, withOtp?: boolean) {
