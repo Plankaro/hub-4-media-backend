@@ -31,8 +31,8 @@ export class UsersController {
   @ApiOkResponse({ type: ProfileDto })
   @Get('/')
   @UseGuards(AuthGuard())
-  getUser(@CurrentUser() user: User) {
-    return { user };
+  getUser(@CurrentUser() user: User): Promise<ProfileDto> {
+    return this.usersService.getSafeUserById(user.id);
   }
 
   @Put('/onboard')
