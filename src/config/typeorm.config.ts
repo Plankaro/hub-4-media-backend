@@ -4,6 +4,19 @@ import { config } from 'dotenv';
 import { User } from 'src/users/user.entity';
 import { UserOtp } from 'src/auth/user-otp.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import {
+  HeroHeadings,
+  HowItWorks,
+  SectionHeadings,
+  Testimonials,
+  WhyChooseUs,
+  OurThreePrinciples,
+  AboutOurCompany,
+  UserEnquiry,
+  ContactDetails,
+  OfferHeadings,
+  Plans,
+} from 'src/home-page/entities';
 config();
 
 const configService = new ConfigService();
@@ -11,7 +24,21 @@ const configService = new ConfigService();
 const commonTypeOrmConfig: DataSourceOptions = {
   logging: true,
   type: 'postgres',
-  entities: [User, UserOtp],
+  entities: [
+    User,
+    UserOtp,
+    HeroHeadings,
+    HowItWorks,
+    SectionHeadings,
+    Testimonials,
+    WhyChooseUs,
+    OurThreePrinciples,
+    AboutOurCompany,
+    UserEnquiry,
+    ContactDetails,
+    OfferHeadings,
+    Plans,
+  ],
   synchronize: true,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),

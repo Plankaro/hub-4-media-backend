@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
 export const generateOtp = (length = 6) => {
