@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class UserAndOtpEntities1736570770096 implements MigrationInterface {
-    name = 'UserAndOtpEntities1736570770096'
+export class UserAndOtpEntities1736573418067 implements MigrationInterface {
+    name = 'UserAndOtpEntities1736573418067'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "user_otp" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "otp" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL, "expiresAt" TIMESTAMP NOT NULL, "otpAttempts" integer NOT NULL DEFAULT '0', "otpAuthRestricted" boolean NOT NULL DEFAULT false, "otpAuthRestrictedTill" TIMESTAMP, "userId" uuid, CONSTRAINT "REL_bd81461d078fe46743dd535fb2" UNIQUE ("userId"), CONSTRAINT "PK_494c022ed33e6ee19a2bbb11b22" PRIMARY KEY ("id"))`);

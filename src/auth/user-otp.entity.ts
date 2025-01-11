@@ -9,7 +9,7 @@ import { User } from '../users/user.entity';
 
 @Entity()
 export class UserOtp {
-  @PrimaryGeneratedColumn('increment')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @OneToOne(() => User, (user) => user.otpDetails)

@@ -15,7 +15,7 @@ import { UserRole } from './types/user-role';
 @Entity()
 export class User {
   @ApiProperty()
-  @PrimaryGeneratedColumn('increment')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty()
