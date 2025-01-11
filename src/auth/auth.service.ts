@@ -33,6 +33,7 @@ import { Response } from 'express';
 import { instanceToPlain } from 'class-transformer';
 import { TokenService } from './token.service';
 import { EmailService } from 'src/email/email.service';
+import { EnvironmentVariable } from 'src/utils/env.validation';
 
 @Injectable()
 export class AuthService {
@@ -41,9 +42,9 @@ export class AuthService {
     private usersService: UsersService,
     private otpService: UserOtpService,
     private emailService: EmailService,
-    private configService: ConfigService,
+    private configService: ConfigService<EnvironmentVariable, true>,
     private tokenService: TokenService,
-  ) {}
+  ) { }
 
   async signIn({ email, password }: SignInUserDto, res: Response) {
     const user = await this.usersService.findVerifiedAccountByEmail(email);

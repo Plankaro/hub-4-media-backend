@@ -5,13 +5,14 @@ import { JwtPayload } from '../users/types/jwt-payload.interface';
 import { ConfigService } from '@nestjs/config';
 import { TokenType } from '../users/types/token-type';
 import { Response } from 'express';
+import { EnvironmentVariable } from 'src/utils/env.validation';
 
 @Injectable()
 export class TokenService {
   constructor(
     private jwtService: JwtService,
-    private configService: ConfigService,
-  ) {}
+    private configService: ConfigService<EnvironmentVariable, true>,
+  ) { }
 
   setRefreshTokenCookie = (refreshToken: string, res: Response) => {
     res.cookie('refreshToken', refreshToken, {
@@ -71,7 +72,7 @@ export class TokenService {
       [TokenType.VALIDATION]: 'VALIDATION_TOKEN_JWT_SECRET',
     };
 
-    return this.configService.get(tokenToSecretMap[tokenType]);
+    return this.configService.get(tokenToSecretMap[tokenType] as keyof EnvironmentVariable);
   }
 
   private async generateToken(

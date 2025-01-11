@@ -1,13 +1,15 @@
-import { plainToInstance, Type } from 'class-transformer';
+import { Type, plainToInstance } from 'class-transformer';
 import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsString,
   IsUrl,
   ValidateIf,
   validateSync,
 } from 'class-validator';
+
 
 export enum Environment {
   Development = 'development',
@@ -23,30 +25,97 @@ export class EnvironmentVariable {
   NODE_ENV: Environment;
 
   @ValidateIf((o) => o.NODE_ENV === Environment.Production)
+  @Type(() => Number)
   @IsNumber()
   @IsOptional()
   @IsNotEmpty()
   PORT: number;
 
-  @IsUrl({ protocols: ['postgres'] })
+  @IsUrl({ protocols: ['postgresql'] })
   @IsNotEmpty()
   DB_URL: string;
 
+  // JWT Secrets
   @IsNotEmpty()
-  JWT_SECRET: string;
+  ACCESS_TOKEN_JWT_SECRET: string;
 
   @IsNotEmpty()
-  JWT_EXPIRATION_TIME: string;
+  REFRESH_TOKEN_JWT_SECRET: string;
+
+  @IsNotEmpty()
+  VALIDATION_TOKEN_JWT_SECRET: string;
+
+  // Google OAuth
+  @IsNotEmpty()
+  GOOGLE_OAUTH_CLIENT_ID: string;
+
+  @IsNotEmpty()
+  GOOGLE_OAUTH_CLIENT_SECRET: string;
+
+  @IsUrl()
+  @IsNotEmpty()
+  GOOGLE_OAUTH_REDIRECT_URL: string;
+
+  // SMTP Configuration
+  @IsNotEmpty()
+  SMTP_HOST: string;
 
   @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty()
-  COOKIE_EXPIRATION_TIME: number;
+  SMTP_PORT: number;
 
   @IsNotEmpty()
-  BCRYPT_SALT_ROUNDS: number;
+  SMTP_SERVICE: string;
 
   @IsNotEmpty()
-  SESSION_SECRET: string;
+  SMTP_MAIL: string;
+
+  @IsNotEmpty()
+  SMTP_MAIL_NAME: string;
+
+  @IsNotEmpty()
+  SMTP_MAIL_EMAIL: string;
+
+  @IsNotEmpty()
+  SMTP_PASSWORD: string;
+
+  // Razorpay Configuration
+  @IsNotEmpty()
+  RAZORPAY_KEY_ID: string;
+
+  @IsNotEmpty()
+  RAZORPAY_KEY_SECRET: string;
+
+  @IsNotEmpty()
+  WEBHOOK_SECRET: string;
+
+  @IsNotEmpty()
+  Merchant_Key: string;
+
+  @IsNotEmpty()
+  Merchant_Salt: string;
+
+  @IsNotEmpty()
+  @Type(() => Number)
+  @IsNumber()
+  Merchant_Id: number;
+
+  // Email Microservice Port
+  @Type(() => Number)
+  @IsNumber()
+  @IsNotEmpty()
+  EMAIL_MICROSERVICE_PORT: number;
+
+  // Auth Api Url 
+  @IsUrl()
+  @IsNotEmpty()
+  AUTH_UI_URL: string;
+
+  // COOKIES_DOMAIN
+  @IsNotEmpty()
+  @IsString()
+  COOKIES_DOMAIN: string
 }
 
 export type EnvironmentVariableType = EnvironmentVariable;

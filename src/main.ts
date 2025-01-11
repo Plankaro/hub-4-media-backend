@@ -9,9 +9,17 @@ import * as cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { createSwaggerDocument } from './swagger';
+import { yellow } from '@nestjs/common/utils/cli-colors.util';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentVariable } from './utils/env.validation';
+import { NestExpressApplication } from '@nestjs/platform-express';
+const port = process.env.PORT || 5000;
+const globalPrefix = 'api';
+const config = new ConfigService<EnvironmentVariable, true>();
+const logger = new Logger('Main');
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({
     // origin: process.env.UI_BASE_URL,
@@ -33,16 +41,25 @@ async function bootstrap() {
     }),
   );
 
-  const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 5000;
 
-  createSwaggerDocument(app);
+
+
+  if (config.get('NODE_ENV') !== 'production') {
+    createSwaggerDocument(app);
+  }
+
 
   await app.listen(port);
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
-  );
+
 }
 
-bootstrap();
+const start = Date.now();
+bootstrap().then(() => {
+  const end = Date.now();
+  logger.log(`🚀 Application started in ${yellow(end - start + 'ms')}`);
+  logger.log(
+    `🚀 ${config.get('NODE_ENV') || 'development'
+    } is running on: http://localhost:${port}/${globalPrefix} 🚀🚀`,
+  );
+});

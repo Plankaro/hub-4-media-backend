@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { config } from 'dotenv';
 import { User } from 'src/users/user.entity';
 import { UserOtp } from 'src/auth/user-otp.entity';
-
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 config();
 
 const configService = new ConfigService();
@@ -14,6 +14,7 @@ const commonTypeOrmConfig: DataSourceOptions = {
   entities: [User, UserOtp],
   synchronize: false,
   ssl: false,
+  namingStrategy: new SnakeNamingStrategy(),
   extra: {
     ssl: {
       rejectUnauthorized: false,
