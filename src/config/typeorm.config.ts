@@ -40,7 +40,7 @@ const commonTypeOrmConfig: DataSourceOptions = {
     OfferHeadings,
     Plans,
   ],
-  synchronize: true,
+  synchronize: false,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {
