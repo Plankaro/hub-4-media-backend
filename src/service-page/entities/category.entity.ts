@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { Service } from './service.entity';
 import { ImageEntity } from 'src/common/entities';
+import { ServiceSubCategory } from './sub-category';
 
 @Entity()
 export class ServiceCategory {
@@ -27,7 +28,7 @@ export class ServiceCategory {
   @Column()
   description: string;
 
-  @ApiProperty({ type: ImageEntity })
+  @ApiProperty({ type: () => ImageEntity })
   @OneToOne(() => ImageEntity, (image) => image.category)
   @JoinColumn()
   image: ImageEntity;
@@ -35,6 +36,11 @@ export class ServiceCategory {
   @ApiProperty()
   @Column('boolean')
   isFeatured: boolean;
+
+  @ApiProperty({ type: () => [ServiceSubCategory] })
+  @OneToMany(() => ServiceSubCategory, (subCategory) => subCategory.category)
+  @JoinColumn()
+  subCategories: ServiceSubCategory[];
 
   @ApiProperty()
   @CreateDateColumn()
@@ -48,7 +54,7 @@ export class ServiceCategory {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @ApiProperty({ type: [Service] })
+  @ApiProperty({ type: () => [Service] })
   @OneToMany(() => Service, (service) => service.category)
   services: Service[];
 }

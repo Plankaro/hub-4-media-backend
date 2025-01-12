@@ -10,13 +10,12 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ExtraService } from './extra-service.entity';
-import { TimeSlot } from './time-slot.entity';
 import { ServiceCategory } from './category.entity';
 import { ServiceSubCategory } from './sub-category';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/users/user.entity';
-import { DaysOfWeek } from '../types/day.enum';
 import { ImageEntity } from 'src/common/entities';
+import { TimeSlotsOfDay } from './time-slots-of-day.entity';
 
 @Entity()
 export class Service {
@@ -33,44 +32,16 @@ export class Service {
   price: number;
 
   @ApiProperty()
+  @Column({ nullable: true })
+  currency?: string;
+
+  @ApiProperty()
   @Column()
   duration: string;
 
   @ApiProperty()
   @Column('text')
   description: string;
-
-  @ApiProperty({ type: [ImageEntity] })
-  @OneToMany(() => ImageEntity, (image) => image.service)
-  images: ImageEntity[];
-
-  @ApiProperty({ type: User })
-  @ManyToOne(() => User, (user) => user.services)
-  provider: User;
-
-  @ApiProperty({ type: ServiceCategory })
-  @ManyToOne(() => ServiceCategory, (category) => category.services)
-  category: ServiceCategory;
-
-  @ApiProperty({ type: ServiceSubCategory })
-  @ManyToOne(() => ServiceSubCategory, (subCategory) => subCategory.services)
-  subCategory: ServiceSubCategory;
-
-  @ApiProperty({ type: [ExtraService] })
-  @OneToMany(() => ExtraService, (extraService) => extraService.service, {
-    cascade: true,
-  })
-  @JoinColumn()
-  extraServices: ExtraService[];
-
-  @ApiProperty({ type: [TimeSlot] })
-  @OneToMany(() => TimeSlot, (timeSlot) => timeSlot.service, { cascade: true })
-  @JoinColumn()
-  timeSlots: TimeSlot[];
-
-  @ApiProperty({ enum: DaysOfWeek, enumName: 'Days in Week' })
-  @Column('enum', { enum: DaysOfWeek })
-  day: DaysOfWeek;
 
   @ApiProperty()
   @Column()
@@ -90,19 +61,53 @@ export class Service {
 
   @ApiProperty()
   @Column()
-  pincode: string;
+  pincode: number;
 
   @ApiProperty()
   @Column()
-  googleMapsPlaceID: string;
+  googleMapPlaceId: string;
 
   @ApiProperty()
-  @Column('decimal', { precision: 10, scale: 6 })
-  latitude: number;
+  @Column()
+  latitude: string;
 
   @ApiProperty()
-  @Column('decimal', { precision: 10, scale: 6 })
-  longitude: number;
+  @Column()
+  longitude: string;
+
+  @ApiProperty({ type: () => [ImageEntity] })
+  @OneToMany(() => ImageEntity, (image) => image.service)
+  @JoinColumn()
+  images: ImageEntity[];
+
+  @ApiProperty({ type: () => User })
+  @ManyToOne(() => User, (user) => user.services)
+  @JoinColumn()
+  provider: User;
+
+  @ApiProperty({ type: () => ServiceCategory })
+  @ManyToOne(() => ServiceCategory, (category) => category.services)
+  @JoinColumn()
+  category: ServiceCategory;
+
+  @ApiProperty({ type: () => ServiceSubCategory })
+  @ManyToOne(() => ServiceSubCategory, (subCategory) => subCategory.services)
+  @JoinColumn()
+  subCategory: ServiceSubCategory;
+
+  @ApiProperty({ type: () => [ExtraService] })
+  @OneToMany(() => ExtraService, (extraService) => extraService.service, {
+    cascade: true,
+  })
+  @JoinColumn()
+  extraServices: ExtraService[];
+
+  @ApiProperty({ type: () => [TimeSlotsOfDay] })
+  @OneToMany(() => TimeSlotsOfDay, (timeSlot) => timeSlot.service, {
+    cascade: true,
+  })
+  @JoinColumn()
+  availability: TimeSlotsOfDay[];
 
   @ApiProperty({ required: false })
   @Column('text', { nullable: true })

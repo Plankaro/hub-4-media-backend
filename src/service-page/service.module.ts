@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ServicePageService } from './services/service.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
@@ -7,13 +7,17 @@ import {
   ServiceCategory,
   ServiceSubCategory,
   TimeSlot,
+  TimeSlotsOfDay,
 } from './entities';
 import { ImageEntity } from 'src/common/entities';
-import { ServiceCategoryService } from './services';
+import { ServiceCategoryService, ServiceSubCategoryService } from './services';
 import {
   ServiceCategoryController,
   ServicePageController,
 } from './controllers';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { UsersModule } from 'src/users/users.module';
+import { ServiceSubCategoryController } from './controllers/sub-category.controller';
 
 @Module({
   imports: [
@@ -23,10 +27,21 @@ import {
       Service,
       ServiceSubCategory,
       TimeSlot,
+      TimeSlotsOfDay,
       ExtraService,
     ]),
+    forwardRef(() => UsersModule),
+    CloudinaryModule,
   ],
-  controllers: [ServicePageController, ServiceCategoryController],
-  providers: [ServicePageService, ServiceCategoryService],
+  controllers: [
+    ServicePageController,
+    ServiceCategoryController,
+    ServiceSubCategoryController,
+  ],
+  providers: [
+    ServicePageService,
+    ServiceCategoryService,
+    ServiceSubCategoryService,
+  ],
 })
 export class ServicePageModule {}

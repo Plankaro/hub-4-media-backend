@@ -24,8 +24,10 @@ import {
   ServiceCategory,
   ServiceSubCategory,
   TimeSlot,
+  TimeSlotsOfDay,
 } from 'src/service-page/entities';
 import { ImageEntity } from 'src/common/entities';
+
 config();
 
 const configService = new ConfigService<EnvironmentVariable, true>();
@@ -50,11 +52,12 @@ const commonTypeOrmConfig: DataSourceOptions = {
     ServiceCategory,
     ImageEntity,
     ServiceSubCategory,
-    Service,
     TimeSlot,
+    TimeSlotsOfDay,
     ExtraService,
+    Service,
   ],
-  synchronize: true,
+  synchronize: false,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {

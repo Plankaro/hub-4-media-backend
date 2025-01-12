@@ -1,37 +1,34 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  OneToMany,
+  JoinColumn,
   ManyToOne,
-  DeleteDateColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Service } from './service.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { TimeSlot } from './time-slot.entity';
 
 @Entity()
-export class ExtraService {
+export class TimeSlotsOfDay {
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty()
   @Column()
-  title: string;
+  day: string;
 
-  @ApiProperty()
-  @Column('decimal', { precision: 10, scale: 2 })
-  price: number;
+  @ApiProperty({ type: () => [TimeSlot] })
+  @OneToMany(() => TimeSlot, (timeSlot) => timeSlot.day, { cascade: true })
+  @JoinColumn()
+  timeSlots: TimeSlot[];
 
-  @ApiProperty()
-  @Column()
-  duration: string;
-
-  @ApiProperty({ type: () => Service })
-  @ManyToOne(() => Service, (service) => service.extraServices, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Service, (service) => service.availability)
   service: Service;
 
   @ApiProperty()

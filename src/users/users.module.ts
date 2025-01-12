@@ -6,6 +6,7 @@ import { User } from './user.entity';
 import { AuthModule } from '../auth/auth.module';
 import { AbilityModule } from '../ability/ability.module';
 import { EmailModule } from 'src/email/email.module';
+import { ServicePageModule } from 'src/service-page/service.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { EmailModule } from 'src/email/email.module';
     forwardRef(() => AuthModule),
     AbilityModule,
     EmailModule,
+    forwardRef(() => ServicePageModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],

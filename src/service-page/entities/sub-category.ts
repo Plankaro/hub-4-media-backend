@@ -4,11 +4,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Service } from './service.entity';
+import { Exclude } from 'class-transformer';
+import { ServiceCategory } from './category.entity';
 
 @Entity()
 export class ServiceSubCategory {
@@ -18,7 +21,7 @@ export class ServiceSubCategory {
 
   @ApiProperty()
   @Column()
-  subCategory: string;
+  title: string;
 
   @ApiProperty()
   @CreateDateColumn()
@@ -32,7 +35,11 @@ export class ServiceSubCategory {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => ServiceCategory })
+  @ManyToOne(() => ServiceCategory, (category) => category.subCategories)
+  category: ServiceCategory;
+
+  @Exclude()
   @OneToMany(() => Service, (service) => service.subCategory)
   services: Service[];
 }

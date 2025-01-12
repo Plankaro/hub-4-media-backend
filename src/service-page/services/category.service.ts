@@ -28,10 +28,15 @@ export class ServiceCategoryService {
   }: CreateCategoryDto): Promise<ServiceCategory> {
     let uploadedImage: ImageEntity;
     try {
-      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      console.log('Image from category,', image);
+      // const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      // uploadedImage = await this.imageRepo.save({
+      //   imageName: imageUpload.original_filename,
+      //   imageUrl: imageUpload.url,
+      // });
       uploadedImage = await this.imageRepo.save({
-        imageName: imageUpload.original_filename,
-        imageUrl: imageUpload.url,
+        imageName: 'imageUpload.original_filename',
+        imageUrl: 'imageUpload.url',
       });
     } catch (error) {
       console.log(`Error uploading category image: `, error);
@@ -92,7 +97,10 @@ export class ServiceCategoryService {
   }
 
   async getById(id: string): Promise<ServiceCategory> {
-    const category = await this.categoryRepo.findOne({ where: { id } });
+    const category = await this.categoryRepo.findOne({
+      where: { id },
+      relations: ['image', 'subCategories'],
+    });
     if (!category) {
       throw new NotFoundException(`Category not found with id: ${id}`);
     }
@@ -100,7 +108,9 @@ export class ServiceCategoryService {
   }
 
   getAllCategories(): Promise<ServiceCategory[]> {
-    return this.categoryRepo.find();
+    return this.categoryRepo.find({
+      relations: ['subCategories'],
+    });
   }
 
   async delete(id: string): Promise<SuccessMessageDto> {

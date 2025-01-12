@@ -1,2 +1,9 @@
 export { CreateCategoryDto } from './create-category.dto';
 export { UpdateCategoryDto } from './update-category.dto';
+export { ExtraServiceDto } from './extra-service.dto';
+export { ServiceLocationDto } from './location.dto';
+export { ServiceSeoDto } from './seo.dto';
+export { TimeSlotsOfDayDto } from './time-slots.dto';
+export { CreateServiceDto } from './create-service.dto';
+export { CreateSubCategoryDto } from './create-sub-category.dto';
+export { TimeSlotDto } from './time-slots.dto';

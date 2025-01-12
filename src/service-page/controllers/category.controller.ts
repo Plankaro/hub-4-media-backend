@@ -13,7 +13,7 @@ import { ServiceCategory } from '../entities';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { SuccessMessageDto } from 'src/common/dtos';
 
-@Controller('services/categories')
+@Controller('services-categories')
 export class ServiceCategoryController {
   constructor(private categoryService: ServiceCategoryService) {}
 

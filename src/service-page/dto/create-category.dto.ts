@@ -19,7 +19,7 @@ export class CreateCategoryDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({ type: ImageUploadDto })
+  @ApiProperty({ type: () => ImageUploadDto })
   @ValidateNested()
   @Type(() => ImageUploadDto)
   image: ImageUploadDto;

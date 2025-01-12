@@ -1,7 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Service } from './service.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { DaysOfWeek } from '../types/day.enum';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
+import { TimeSlotsOfDay } from './time-slots-of-day.entity';
 
 @Entity()
 export class TimeSlot {
@@ -11,19 +18,28 @@ export class TimeSlot {
 
   @ApiProperty()
   @Column()
-  fromTime: string;
+  from: string;
 
   @ApiProperty()
   @Column()
-  toTime: string;
+  to: string;
 
-  @ApiProperty({ enum: DaysOfWeek, enumName: 'Days in Week' })
-  @Column('enum', { enum: DaysOfWeek })
-  slots: DaysOfWeek;
+  @ApiProperty()
+  @Column({ nullable: true })
+  slot: string;
 
-  @ApiProperty({ type: Service })
-  @ManyToOne(() => Service, (service) => service.timeSlots, {
-    onDelete: 'CASCADE',
-  })
-  service: Service;
+  @ManyToOne(() => TimeSlotsOfDay, (day) => day.timeSlots)
+  day: TimeSlotsOfDay;
+
+  @ApiProperty()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @ApiProperty()
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @ApiProperty()
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
