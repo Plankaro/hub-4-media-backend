@@ -6,12 +6,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ServicePageService } from '../services';
 import { CreateServiceDto } from '../dto';
 import { Service } from '../entities';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { SuccessMessageDto } from 'src/common/dtos';
+import { ServiceFilterDto } from '../dto/service-filter.dto';
 
 @Controller('services')
 export class ServicePageController {
@@ -40,8 +42,8 @@ export class ServicePageController {
 
   @Get('/')
   @ApiOkResponse({ type: [Service] })
-  getAllServices(): Promise<Service[]> {
-    return this.service.getAllServices();
+  getAllServices(@Query() query: ServiceFilterDto): Promise<Service[]> {
+    return this.service.getAllServices(query);
   }
 
   @Delete('/:id')
