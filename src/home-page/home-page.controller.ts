@@ -103,7 +103,7 @@ export class HomePageController {
     return this.homePageService.updateSectionHeadings(sectionName, body);
   }
 
-  @ApiOkResponse({ type: SectionHeadings })
+  @ApiOkResponse({ type: [SectionHeadings] })
   @Get('/section-headings')
   findSectionHeadings(): Promise<SectionHeadings[]> {
     return this.homePageService.getSectionHeadings();
