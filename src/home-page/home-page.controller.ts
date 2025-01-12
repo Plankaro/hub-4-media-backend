@@ -132,7 +132,7 @@ export class HomePageController {
     return this.homePageService.updatePricePlan(id, body);
   }
 
-  @ApiOkResponse({ type: Plans })
+  @ApiOkResponse({ type: [Plans] })
   @Get('/price-plan')
   getAllPricePlans(): Promise<Plans[]> {
     return this.homePageService.getAllPricePlans();
@@ -161,7 +161,7 @@ export class HomePageController {
     return this.homePageService.updateOfferHeadings(id, body);
   }
 
-  @ApiOkResponse({ type: OfferHeadings })
+  @ApiOkResponse({ type: [OfferHeadings] })
   @Get('offer-headings')
   async findOfferHeadings(): Promise<OfferHeadings[]> {
     return this.homePageService.getAllOfferHeadings();

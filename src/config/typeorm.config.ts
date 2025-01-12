@@ -54,7 +54,7 @@ const commonTypeOrmConfig: DataSourceOptions = {
     TimeSlot,
     ExtraService,
   ],
-  synchronize: false,
+  synchronize: true,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {

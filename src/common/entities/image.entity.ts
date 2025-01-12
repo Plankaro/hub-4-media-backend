@@ -3,6 +3,7 @@ import { Service, ServiceCategory } from 'src/service-page/entities';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToOne,
   OneToOne,
@@ -26,6 +27,10 @@ export class ImageEntity {
   @ApiProperty()
   @CreateDateColumn()
   createdAt: Date;
+
+  @ApiProperty()
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @OneToOne(() => ServiceCategory, (category) => category.image, {
     nullable: true,

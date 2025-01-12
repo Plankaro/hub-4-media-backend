@@ -5,6 +5,9 @@ import {
   OneToMany,
   JoinColumn,
   ManyToOne,
+  CreateDateColumn,
+  DeleteDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ExtraService } from './extra-service.entity';
 import { TimeSlot } from './time-slot.entity';
@@ -120,4 +123,16 @@ export class Service {
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   institution?: string;
+
+  @ApiProperty()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @ApiProperty()
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @ApiProperty()
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
