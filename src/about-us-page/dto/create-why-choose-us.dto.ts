@@ -32,7 +32,7 @@ export class CreateWhyChooseUsDto {
   @Type(() => ImageUploadDto)
   image: ImageUploadDto;
 
-  @ApiProperty()
+  @ApiProperty({ type: [WhyChooseUsCardsDto] })
   @IsNotEmpty()
   @IsArray({ each: true })
   @ValidateNested({ each: true })

@@ -14,7 +14,7 @@ export class UserEnquiryDto {
   @IsString()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   message?: string;

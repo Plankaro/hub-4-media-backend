@@ -10,6 +10,7 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
+import { WhyChooseUsCardsDto } from '../dto';
 
 @Entity()
 export class WhyChooseUs {
@@ -25,9 +26,9 @@ export class WhyChooseUs {
   @Column()
   description: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: [WhyChooseUsCardsDto] })
   @Column('json')
-  cards: { heading: string; description: string }[];
+  cards: WhyChooseUsCardsDto[];
 
   @ApiProperty({ type: () => ImageEntity })
   @OneToOne(() => ImageEntity, (image) => image.chooseUs)
