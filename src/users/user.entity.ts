@@ -5,12 +5,14 @@ import {
   OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { AuthProvider } from './types/account-type';
 import { Exclude } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserOtp } from '../auth/user-otp.entity';
 import { UserRole } from './types/user-role';
+import { Service } from 'src/service-page/entities';
 
 @Entity()
 export class User {
@@ -99,4 +101,7 @@ export class User {
   @ApiProperty()
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Service, (service) => service.provider)
+  services: Service[];
 }

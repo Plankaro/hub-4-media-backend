@@ -18,6 +18,14 @@ import {
   Plans,
 } from 'src/home-page/entities';
 import { EnvironmentVariable } from 'src/utils/env.validation';
+import {
+  ExtraService,
+  Service,
+  ServiceCategory,
+  ServiceSubCategory,
+  TimeSlot,
+} from 'src/service-page/entities';
+import { ImageEntity } from 'src/common/entities';
 config();
 
 const configService = new ConfigService<EnvironmentVariable, true>();
@@ -39,8 +47,14 @@ const commonTypeOrmConfig: DataSourceOptions = {
     ContactDetails,
     OfferHeadings,
     Plans,
+    ServiceCategory,
+    ImageEntity,
+    ServiceSubCategory,
+    Service,
+    TimeSlot,
+    ExtraService,
   ],
-  synchronize: false,
+  synchronize: true,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {

@@ -1,9 +1,9 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class Image {
+export class ImageUploadDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  imageName: string;
 
   @IsString()
   @IsNotEmpty()

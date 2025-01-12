@@ -3,11 +3,12 @@ import {
   IsEmail,
   IsNotEmpty,
   IsString,
+  IsStrongPassword,
   MaxLength,
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class SignUpUserDto {
   @ApiProperty()
@@ -32,7 +33,16 @@ export class SignUpUserDto {
   email: string;
 
   @ApiProperty()
+  @IsStrongPassword({
+    minLength: 8,
+    minLowercase: 1,
+    minUppercase: 1,
+    minNumbers: 1,
+    minSymbols: 1,
+  })
   @IsString()
+  @Type(() => String)
+  @IsNotEmpty()
   @MinLength(8)
   password: string;
 }

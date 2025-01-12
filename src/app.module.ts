@@ -43,6 +43,7 @@ import { AboutUsPageModule } from './about-us-page/about-us.module';
     ContactUsPageModule,
     ServicePageModule,
     AboutUsPageModule,
+    ServicePageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
