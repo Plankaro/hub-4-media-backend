@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ImageEntity } from 'src/common/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,37 +7,32 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  JoinColumn,
+  OneToOne,
 } from 'typeorm';
 
 @Entity()
-export class Testimonials {
+export class WhyChooseUs {
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty()
-  @Column({ nullable: true, default: '' })
-  profilePictureUrl: string;
-
-  @ApiProperty()
-  @Column({ nullable: true, default: '' })
-  imagePublicId: string;
+  @Column()
+  heading: string;
 
   @ApiProperty()
   @Column()
   description: string;
 
   @ApiProperty()
-  @Column()
-  rating: number;
+  @Column('json')
+  cards: { heading: string; description: string }[];
 
-  @ApiProperty()
-  @Column()
-  name: string;
-
-  @ApiProperty()
-  @Column()
-  designation: string;
+  @ApiProperty({ type: () => ImageEntity })
+  @OneToOne(() => ImageEntity, (image) => image.chooseUs)
+  @JoinColumn()
+  image: ImageEntity;
 
   @ApiProperty()
   @CreateDateColumn()

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ImageEntity } from 'src/common/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,6 +7,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  JoinColumn,
+  OneToOne,
 } from 'typeorm';
 
 @Entity()
@@ -38,13 +41,10 @@ export class ContactDetails {
   @Column({ nullable: true })
   googelMapLocation?: string;
 
-  @ApiProperty()
-  @Column({ nullable: true, default: '' })
-  img: string;
-
-  @ApiProperty()
-  @Column({ nullable: true, default: '' })
-  imgPublicID: string;
+  @ApiProperty({ type: () => ImageEntity })
+  @OneToOne(() => ImageEntity, (image) => image.aboutUs)
+  @JoinColumn()
+  image: ImageEntity;
 
   @ApiProperty()
   @CreateDateColumn()

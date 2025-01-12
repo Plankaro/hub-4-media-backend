@@ -21,7 +21,7 @@ export class ServiceCategory {
   id: string;
 
   @ApiProperty()
-  @Column()
+  @Column({ unique: true })
   title: string;
 
   @ApiProperty()

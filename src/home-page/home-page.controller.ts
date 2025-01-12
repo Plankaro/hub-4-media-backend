@@ -6,13 +6,9 @@ import {
   Param,
   Post,
   Put,
-  // Res,
-  // UploadedFile,
-  // UseInterceptors,
 } from '@nestjs/common';
-// import { FileInterceptor } from '@nestjs/platform-express';
+
 import {
-  // ContactDto,
   HeroHeadingsDto,
   HowItWorksDto,
   OfferHeadingsDto,
@@ -174,92 +170,6 @@ export class HomePageController {
   ): Promise<SuccessMessageDto> {
     return this.homePageService.deleteOfferHeadings(id);
   }
-
-  // @Put('contact/:id')
-  // // @UseInterceptors(FileInterceptor('file'))
-  // async updateContact(
-  //   @Param('id') id: string,
-  //   @Body() updateContactDto: Partial<ContactDto>,
-  //   @UploadedFile() file?: Express.Multer.File,
-  // ) {
-  //   return await this.homePageService.updateContactDetail(
-  //     id,
-  //     updateContactDto,
-  //     file,
-  //   );
-  // }
-
-  // Also Sed emmail to user for successful enquiry
-
-  // @Post('add-aboutourcompany')
-  // async submitAbout(
-  //   @Body('heading') heading: string,
-  //   @Body('descriptionOne') descriptionOne: string,
-  //   @Body('descriptionTwo') descriptionTwo: string,
-  //   @Body('sideText') sideText: string,
-  //   @Res() res: Response,
-  // ) {
-  //   const result = await this.homePageService.createAbout({
-  //     heading,
-  //     descriptionOne,
-  //     descriptionTwo,
-  //     sideText,
-  //   });
-  //   return res.json(result);
-  // }
-
-  // @UseInterceptors(FileInterceptor('file'))
-  // @Post('update-aboutourcompany/:id')
-  // async updateAbout(
-  //   @Param('id') id: string,
-  //   @Body() updateAboutDto: Partial<CreateUserDto>,
-  //   @UploadedFile() file?: Express.Multer.File,
-  //   // @Body('heading') heading: string,
-  //   // @Body('descriptionOne') descriptionOne: string,
-  //   // @Body('descriptionTwo') descriptionTwo: string,
-  //   // @Body('sideText') sideText: string,
-  // ) {
-  //   return await this.homePageService.updateAbout(id, updateAboutDto, file);
-  // }
-
-  // @Get('get-abouour-company')
-  // async getAbouOurCompany() {
-  //   return await this.homePageService.getAbouOurCompany();
-  // }
-
-  // @Post('add-our-principle')
-  // async addOurThreePrinciples(
-  //   @Body() createUserDto: CreateUserDto,
-  //   @Res() res: Response,
-  // ) {
-  //   return this.homePageService.addOurThreePrinciples(createUserDto, res);
-  // }
-
-  // @Post('update-our-principle/:id')
-  // async updateOurThreePrinciples(
-  //   @Param('id') id: string,
-  //   @Body() updateOurThreePrinciples: UpdateUserDto,
-  //   @Res() res: Response,
-  // ) {
-  //   return this.homePageService.updateOurThreePrinciples(
-  //     id,
-  //     updateOurThreePrinciples,
-  //     res,
-  //   );
-  // }
-
-  // @Get('get-our-principle')
-  // async getOurThreePrinciples(@Res() res: Response) {
-  //   return this.homePageService.getOurThreePrinciples(res);
-  // }
-
-  // @Post('add-whaychooseus')
-  // async addOurWhayChooseUs(
-  //   @Body() createUserDto: CreateUserDto,
-  //   @Res() res: Response,
-  // ) {
-  //   return this.homePageService.addOurWhayChooseUs(createUserDto, res);
-  // }
 
   // @UseInterceptors(FileInterceptor('file'))
   // @Post('update-whaychooseus/:id')

@@ -6,10 +6,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  JoinColumn,
+  OneToOne,
 } from 'typeorm';
+import { ImageEntity } from 'src/common/entities';
 
 @Entity()
-export class WhyChooseUs {
+export class OurThreePrinciples {
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -20,19 +23,12 @@ export class WhyChooseUs {
 
   @ApiProperty()
   @Column()
-  subHeading: string;
+  description: string;
 
-  @ApiProperty()
-  @Column('json', { nullable: true })
-  cards?: { heading: string; description: string }[];
-
-  @ApiProperty()
-  @Column({ nullable: true, default: '' })
-  img: string;
-
-  @ApiProperty()
-  @Column({ nullable: true, default: '' })
-  imgPublicID: string;
+  @ApiProperty({ type: () => ImageEntity })
+  @OneToOne(() => ImageEntity, (image) => image.principle)
+  @JoinColumn()
+  image: ImageEntity;
 
   @ApiProperty()
   @CreateDateColumn()

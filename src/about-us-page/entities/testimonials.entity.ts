@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ImageEntity } from 'src/common/entities';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,36 +7,36 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  JoinColumn,
+  OneToOne,
 } from 'typeorm';
 
-export class CardsDto {
-  @ApiProperty()
-  icons: string;
-
-  @ApiProperty()
-  heading: string;
-
-  @ApiProperty()
-  subheading: string;
-}
-
 @Entity()
-export class OurThreePrinciples {
+export class Testimonials {
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty()
   @Column()
-  heading: string;
+  description: string;
 
   @ApiProperty()
   @Column()
-  subHeading: string;
+  rating: number;
 
-  @ApiProperty({ type: [CardsDto] })
-  @Column('json', { nullable: true })
-  cards?: { icon?: string; heading: string; subheading: string }[];
+  @ApiProperty()
+  @Column()
+  name: string;
+
+  @ApiProperty()
+  @Column()
+  designation: string;
+
+  @ApiProperty({ type: () => ImageEntity })
+  @OneToOne(() => ImageEntity, (image) => image.testimonial)
+  @JoinColumn()
+  image: ImageEntity;
 
   @ApiProperty()
   @CreateDateColumn()

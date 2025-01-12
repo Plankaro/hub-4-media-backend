@@ -4,6 +4,8 @@ import { ContactDto } from 'src/home-page/dto';
 import { ContactDetails, UserEnquiry } from 'src/home-page/entities';
 import { Repository } from 'typeorm';
 import { UserEnquiryDto } from './dto';
+import { ImageEntity } from 'src/common/entities';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class ContactUsPageService {
@@ -12,6 +14,8 @@ export class ContactUsPageService {
     private contactDetailsRepo: Repository<ContactDetails>,
     @InjectRepository(UserEnquiry)
     private userEnquiryRepo: Repository<UserEnquiry>,
+    @InjectRepository(ImageEntity) private imageRepo: Repository<ImageEntity>,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   // First Delete previous contact details and then save new one ( In transaction)
@@ -22,13 +26,25 @@ export class ContactUsPageService {
     extraEmail,
     address,
     googelMapLocation,
-    img,
-    imgPublicID,
+    image,
   }: ContactDto): Promise<ContactDetails> {
+    let uploadedImage: ImageEntity;
+    try {
+      console.log('Image from category,', image);
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
+      });
+    } catch (error) {
+      console.log(`Error uploading category image: `, error);
+      throw new InternalServerErrorException();
+    }
+
     return await this.contactDetailsRepo.manager.transaction(
       async (transactionalEntityManager) => {
         // Delete all entries
-        await transactionalEntityManager.delete(ContactDetails, {});
+        await transactionalEntityManager.softDelete(ContactDetails, {});
 
         // Create and save new entry
         const contactDetails = this.contactDetailsRepo.create({
@@ -38,18 +54,19 @@ export class ContactUsPageService {
           extraEmail,
           address,
           googelMapLocation,
-          img,
-          imgPublicID,
+          image: uploadedImage,
         });
 
-        return transactionalEntityManager.save(contactDetails);
+        return transactionalEntityManager.save(ContactDetails, contactDetails);
       },
     );
   }
 
   async getContactDetails(): Promise<ContactDetails> {
     try {
-      const contacts = await this.contactDetailsRepo.find();
+      const contacts = await this.contactDetailsRepo.find({
+        relations: ['image'],
+      });
 
       return contacts[0];
     } catch (error) {

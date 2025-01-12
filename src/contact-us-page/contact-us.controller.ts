@@ -17,7 +17,7 @@ export class ContactUsPageController {
 
   @ApiOkResponse({ type: ContactDetails })
   @Get('/')
-  async getContacts() {
+  async getContacts(): Promise<ContactDetails> {
     return await this.contactUsPageService.getContactDetails();
   }
 

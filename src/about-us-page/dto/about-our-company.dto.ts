@@ -1,34 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEmail, IsString, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { ImageUploadDto } from 'src/common/dtos';
 
-export class ContactDto {
+export class AboutOurCompanyDto {
   @ApiProperty()
   @IsString()
-  phonNumber: string;
-
-  @ApiProperty()
-  @IsString()
-  extraPhonNumber?: string;
-
-  @ApiProperty()
-  @IsEmail()
-  email: string;
-
-  @ApiProperty()
-  @IsEmail()
-  extraEmail?: string;
+  @IsNotEmpty()
+  heading: string;
 
   @ApiProperty()
   @IsString()
-  address: string;
+  @IsNotEmpty()
+  descriptionOne: string;
 
   @ApiProperty()
   @IsString()
-  googelMapLocation?: string;
+  @IsNotEmpty()
+  descriptionTwo: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  sideText: string;
 
   @ApiProperty({ type: ImageUploadDto })
+  @IsNotEmpty()
   @ValidateNested()
   @Type(() => ImageUploadDto)
   image: ImageUploadDto;
