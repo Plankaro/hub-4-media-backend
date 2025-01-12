@@ -13,7 +13,6 @@ import {
   Plans,
   SectionHeadings,
   Testimonials,
-  UserEnquiry,
   WhyChooseUs,
 } from './entities';
 import { Repository } from 'typeorm';
@@ -26,7 +25,6 @@ import {
 } from './dto';
 import { PricePlanDto } from './dto/price-plan.dto';
 import { SuccessMessageDto } from 'src/auth/dtos';
-import { UserEnquiryDto } from './dto/user-enquiry.dto';
 import { SectionName } from './types/section-name.enum';
 
 @Injectable()
@@ -46,9 +44,6 @@ export class HomePageService {
 
     @InjectRepository(OfferHeadings)
     private offerHeadingsRepo: Repository<OfferHeadings>,
-
-    @InjectRepository(UserEnquiry)
-    private userEnquiryRepo: Repository<UserEnquiry>,
 
     @InjectRepository(AboutOurCompany)
     private aboutOurCompanyRepo: Repository<AboutOurCompany>,
@@ -424,30 +419,6 @@ export class HomePageService {
     }
   }
 
-  async userEquiry({
-    name,
-    mobile,
-    message,
-    email,
-  }: UserEnquiryDto): Promise<UserEnquiry> {
-    try {
-      const enquiry = this.userEnquiryRepo.create({
-        name,
-        mobile,
-        message,
-        email,
-      });
-
-      return this.userEnquiryRepo.save(enquiry);
-    } catch (error) {
-      console.log('Error saving user enquiry', error);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async getAllUserEnquiries(): Promise<UserEnquiry[]> {
-    return this.userEnquiryRepo.find();
-  }
   // async updateContactDetail(
   //   id: string,
   //   updateContactDto: Partial<CreateUserDto>,

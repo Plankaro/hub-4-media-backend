@@ -1,8 +1,9 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { ContactDto } from 'src/home-page/dto';
-import { ContactDetails } from 'src/home-page/entities';
+import { ContactDetails, UserEnquiry } from 'src/home-page/entities';
 import { ContactUsPageService } from './contact-us.service';
+import { UserEnquiryDto } from './dto';
 
 @Controller('contact-us')
 export class ContactUsPageController {
@@ -18,5 +19,17 @@ export class ContactUsPageController {
   @Get('/')
   async getContacts() {
     return await this.contactUsPageService.getContactDetails();
+  }
+
+  @ApiCreatedResponse({ type: UserEnquiry })
+  @Post('user-inquiry')
+  async userEnquiry(@Body() body: UserEnquiryDto) {
+    return await this.contactUsPageService.userEquiry(body);
+  }
+
+  @ApiOkResponse({ type: [UserEnquiry] })
+  @Get('/user-enquiries')
+  getAllUserEnquiries(): Promise<UserEnquiry[]> {
+    return this.contactUsPageService.getAllUserEnquiries();
   }
 }

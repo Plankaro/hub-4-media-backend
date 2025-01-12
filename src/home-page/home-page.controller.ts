@@ -25,12 +25,11 @@ import {
   OfferHeadings,
   Plans,
   SectionHeadings,
-  UserEnquiry,
 } from './entities';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { SectionHeadingDto } from './dto/section-headings.dto';
 import { PricePlanDto } from './dto/price-plan.dto';
-import { UserEnquiryDto } from './dto/user-enquiry.dto';
+
 import { SectionName } from './types/section-name.enum';
 
 @Controller('home')
@@ -191,17 +190,6 @@ export class HomePageController {
   // }
 
   // Also Sed emmail to user for successful enquiry
-  @ApiCreatedResponse({ type: UserEnquiry })
-  @Post('user-inquiry')
-  async userEnquiry(@Body() body: UserEnquiryDto) {
-    return await this.homePageService.userEquiry(body);
-  }
-
-  @ApiOkResponse({ type: [UserEnquiry] })
-  @Get('/user-enquiries')
-  getAllUserEnquiries(): Promise<UserEnquiry[]> {
-    return this.homePageService.getAllUserEnquiries();
-  }
 
   // @Post('add-aboutourcompany')
   // async submitAbout(

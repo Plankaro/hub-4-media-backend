@@ -25,7 +25,7 @@ export class UserEnquiry {
   @Column()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @Column({ nullable: true })
   message?: string;
 
