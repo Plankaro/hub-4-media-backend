@@ -62,7 +62,7 @@ const commonTypeOrmConfig: DataSourceOptions = {
     BlogCategory,
     BlogPost,
   ],
-  synchronize: true,
+  synchronize: false,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {
