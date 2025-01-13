@@ -19,6 +19,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ImageEntity } from 'src/common/entities';
 import { SuccessMessageDto } from 'src/common/dtos';
+import { ServiceFilterDto } from '../dto/service-filter.dto';
 
 @Injectable()
 export class ServicePageService {
@@ -256,8 +257,19 @@ export class ServicePageService {
     return service;
   }
 
-  getAllServices(): Promise<Service[]> {
-    return this.serviceRepo.find();
+  async getAllServices({ categoryId }: ServiceFilterDto): Promise<Service[]> {
+    const query = this.serviceRepo.createQueryBuilder('service');
+
+    // Join the category relationship
+    query.leftJoinAndSelect('service.category', 'category');
+
+    // Apply filtering by category if `categoryId` is provided
+    if (categoryId) {
+      query.where('category.id = :categoryId', { categoryId });
+    }
+
+    // Fetch the results
+    return query.getMany();
   }
 
   async delete(id: string): Promise<SuccessMessageDto> {
