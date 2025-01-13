@@ -26,7 +26,7 @@ export class AboutUsPageController {
 
   @Get('our-company')
   @ApiOkResponse({ type: [AboutOurCompany] })
-  async updateAbout(): Promise<AboutOurCompany[]> {
+  async getAboutOurCompany(): Promise<AboutOurCompany[]> {
     return this.aboutUsService.getAboutOurCompany();
   }
 
