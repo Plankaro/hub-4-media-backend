@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { ImageUploadDto } from 'src/common/dtos';
 
 export class HeroHeadingsDto {
   @ApiProperty()
@@ -17,4 +19,9 @@ export class HeroHeadingsDto {
   @IsString()
   @IsNotEmpty()
   thirdHeading: string;
+
+  @ApiProperty({ type: ImageUploadDto })
+  @ValidateNested()
+  @Type(() => ImageUploadDto)
+  image: ImageUploadDto;
 }

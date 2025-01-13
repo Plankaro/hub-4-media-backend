@@ -3,6 +3,7 @@ import { BlogPost } from 'src/blog/entities';
 import {
   AboutOurCompany,
   ContactDetails,
+  HeroHeadings,
   HowItWorks,
   OfferHeadings,
   OurThreePrinciples,
@@ -91,6 +92,11 @@ export class ImageEntity {
     nullable: true,
   })
   blog: BlogPost;
+
+  @OneToOne(() => HeroHeadings, (hero) => hero.image, {
+    nullable: true,
+  })
+  heroHeading: HeroHeadings;
 
   @ManyToOne(() => Service, (service) => service.images, {
     nullable: true,

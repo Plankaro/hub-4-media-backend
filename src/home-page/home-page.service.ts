@@ -58,6 +58,7 @@ export class HomePageService {
     firstHeading,
     secondHeading,
     thirdHeading,
+    image,
   }: HeroHeadingsDto) {
     // const heroHeading = this.heroHeadingsRepo.create({
     //   firstHeading,
@@ -66,6 +67,19 @@ export class HomePageService {
     // });
 
     // return this.heroHeadingsRepo.save(heroHeading);
+
+    let uploadedImage: ImageEntity;
+    try {
+      console.log('Image from category,', image);
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
+      });
+    } catch (error) {
+      console.log(`Error uploading category image: `, error);
+      throw new InternalServerErrorException();
+    }
 
     return await this.heroHeadingsRepo.manager.transaction(
       async (transactionalEntityManager) => {
@@ -77,6 +91,7 @@ export class HomePageService {
           firstHeading,
           secondHeading,
           thirdHeading,
+          image: uploadedImage,
         });
 
         return transactionalEntityManager.save(heroHeading);
@@ -110,7 +125,9 @@ export class HomePageService {
   // }
 
   async getHeroHeadings(): Promise<HeroHeadings> {
-    const heroHeading = await this.heroHeadingsRepo.find();
+    const heroHeading = await this.heroHeadingsRepo.find({
+      relations: ['image'],
+    });
 
     if (!heroHeading) {
       throw new NotFoundException('Hero heading not found');
