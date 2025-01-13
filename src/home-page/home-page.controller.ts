@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 
 import {
+  CreatePartnerDto,
   HeroHeadingsDto,
   HowItWorksDto,
   OfferHeadingsDto,
@@ -19,6 +20,7 @@ import {
   HeroHeadings,
   HowItWorks,
   OfferHeadings,
+  Partners,
   Plans,
   SectionHeadings,
 } from './entities';
@@ -140,34 +142,61 @@ export class HomePageController {
     return this.homePageService.deletePricePlanById(id);
   }
 
+  @Post('/partner')
+  @ApiOkResponse({ type: Partners })
+  async addPartner(@Body() body: CreatePartnerDto): Promise<Partners> {
+    return this.homePageService.createPartner(body);
+  }
+
+  @Put('/partner/:id')
+  @ApiOkResponse({ type: Partners })
+  async updatePartner(
+    @Param('id') id: string,
+    @Body() body: CreatePartnerDto,
+  ): Promise<Partners> {
+    return this.homePageService.updatePartner(id, body);
+  }
+
+  @ApiOkResponse({ type: [Partners] })
+  @Get('/partner')
+  getAllPartners(): Promise<Partners[]> {
+    return this.homePageService.getAllPartners();
+  }
+
+  @ApiOkResponse({ type: SuccessMessageDto })
+  @Delete('partner/:id')
+  async deletePartner(@Param('id') id: string): Promise<SuccessMessageDto> {
+    return this.homePageService.deletePartner(id);
+  }
+
   @ApiCreatedResponse({ type: OfferHeadings })
   @Post('offer-headings')
-  async addOfferHeadings(
+  async createOfferHeading(
     @Body() body: OfferHeadingsDto,
   ): Promise<OfferHeadings> {
     return this.homePageService.addOfferHeadings(body);
   }
 
+  // @ApiOkResponse({ type: OfferHeadings })
+  // @Put('offer-headings/:id')
+  // async updateOfferHeadings(
+  //   @Param('id') id: string,
+  //   @Body() body: OfferHeadingsDto,
+  // ): Promise<OfferHeadings> {
+  //   return this.homePageService.updateOfferHeadings(id, body);
+  // }
+
   @ApiOkResponse({ type: OfferHeadings })
-  @Put('offer-headings/:id')
-  async updateOfferHeadings(
-    @Param('id') id: string,
-    @Body() body: OfferHeadingsDto,
-  ): Promise<OfferHeadings> {
-    return this.homePageService.updateOfferHeadings(id, body);
-  }
-
-  @ApiOkResponse({ type: [OfferHeadings] })
   @Get('offer-headings')
-  async findOfferHeadings(): Promise<OfferHeadings[]> {
-    return this.homePageService.getAllOfferHeadings();
+  async getOfferHeading(): Promise<OfferHeadings> {
+    return this.homePageService.getOfferHeading();
   }
 
-  @ApiOkResponse({ type: SuccessMessageDto })
-  @Delete('offer-headings/:id')
-  async deleteOfferHeadings(
-    @Param('id') id: string,
-  ): Promise<SuccessMessageDto> {
-    return this.homePageService.deleteOfferHeadings(id);
-  }
+  // @ApiOkResponse({ type: SuccessMessageDto })
+  // @Delete('offer-headings/:id')
+  // async deleteOfferHeadings(
+  //   @Param('id') id: string,
+  // ): Promise<SuccessMessageDto> {
+  //   return this.homePageService.deleteOfferHeadings(id);
+  // }
 }

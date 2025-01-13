@@ -10,7 +10,6 @@ import {
   validateSync,
 } from 'class-validator';
 
-
 export enum Environment {
   Development = 'development',
   Production = 'production',
@@ -107,7 +106,7 @@ export class EnvironmentVariable {
   @IsNotEmpty()
   EMAIL_MICROSERVICE_PORT: number;
 
-  // Auth Api Url 
+  // Auth Api Url
   @IsString()
   @IsNotEmpty()
   AUTH_UI_URL: string;
@@ -115,7 +114,7 @@ export class EnvironmentVariable {
   // COOKIES_DOMAIN
   @IsNotEmpty()
   @IsString()
-  COOKIES_DOMAIN: string
+  COOKIES_DOMAIN: string;
 }
 
 export type EnvironmentVariableType = EnvironmentVariable;

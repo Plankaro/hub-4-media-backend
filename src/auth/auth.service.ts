@@ -114,10 +114,23 @@ export class AuthService {
     email,
     password,
   }: SignUpUserDto) {
-    const existingUser = await this.usersService.findAccountByEmail(email);
+    // Use Promise.all Here
+    // const existingUser = await this.usersService.findAccountByEmail(email);
+
+    const [existingUser, existingUserWithUserName] = await Promise.all([
+      this.usersService.findAccountByEmail(email),
+      this.usersService.findAccountByUsername(username),
+    ]);
 
     if (existingUser) {
       throw new BadRequestException('Email already in use');
+    }
+
+    // const existingUserWithUserName =
+    //   await this.usersService.findAccountByUsername(username);
+
+    if (existingUserWithUserName) {
+      throw new BadRequestException('Username already exists');
     }
 
     const hashedPassword = await hashPassword(password);

@@ -21,7 +21,7 @@ export class User {
   id: string;
 
   @ApiProperty()
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @ApiProperty()

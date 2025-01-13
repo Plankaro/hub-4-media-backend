@@ -3,18 +3,15 @@ import { HomePageController } from './home-page.controller';
 import { HomePageService } from './home-page.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  AboutOurCompany,
-  ContactDetails,
   HeroHeadings,
   HowItWorks,
   OfferHeadings,
-  OurThreePrinciples,
+  Partners,
   Plans,
   SectionHeadings,
-  Testimonials,
-  UserEnquiry,
-  WhyChooseUs,
 } from './entities';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { ImageEntity } from 'src/common/entities';
 
 @Module({
   imports: [
@@ -22,15 +19,12 @@ import {
       HeroHeadings,
       HowItWorks,
       SectionHeadings,
-      Testimonials,
-      WhyChooseUs,
-      OurThreePrinciples,
-      AboutOurCompany,
-      UserEnquiry,
-      ContactDetails,
       OfferHeadings,
       Plans,
+      Partners,
+      ImageEntity,
     ]),
+    CloudinaryModule,
   ],
   controllers: [HomePageController],
   providers: [HomePageService],

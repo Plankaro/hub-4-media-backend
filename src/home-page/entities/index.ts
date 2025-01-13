@@ -9,3 +9,4 @@ export { UserEnquiry } from '../../contact-us-page/entities/user-enquiry.entity'
 export { ContactDetails } from '../../contact-us-page/entities/contact-details.entity';
 export { OfferHeadings } from './offer-headings.entity';
 export { Plans } from './plans.entity';
+export { Partners } from './partner.entity';

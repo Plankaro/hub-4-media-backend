@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { AboutUsPageService } from './about-us.service';
 import {
   AboutOurCompanyDto,
@@ -11,11 +19,15 @@ import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { OurThreePrinciples } from './entities/our-three-principles.entity';
 import { Testimonials } from './entities/testimonials.entity';
 import { WhyChooseUs } from './entities/why-choose-us.entity';
+import { SuccessMessageDto } from 'src/common/dtos';
 
 @Controller('about-us')
 export class AboutUsPageController {
   constructor(private aboutUsService: AboutUsPageService) {}
 
+  /**
+   * * Our Company
+   */
   @Post('our-company')
   @ApiCreatedResponse({ type: AboutOurCompany })
   async createAboutOurCompany(
@@ -29,6 +41,10 @@ export class AboutUsPageController {
   async getAboutOurCompany(): Promise<AboutOurCompany[]> {
     return this.aboutUsService.getAboutOurCompany();
   }
+
+  /**
+   * * Our Three Principles
+   */
 
   @Post('our-principle')
   @ApiCreatedResponse({ type: OurThreePrinciples })
@@ -61,6 +77,18 @@ export class AboutUsPageController {
     return this.aboutUsService.getOurPrincipleById(id);
   }
 
+  @Delete('our-principles/:id')
+  @ApiOkResponse({ type: SuccessMessageDto })
+  async deleteOurPrinciple(
+    @Param('id') id: string,
+  ): Promise<SuccessMessageDto> {
+    return this.aboutUsService.deleteOurPrinciple(id);
+  }
+
+  /**
+   * * Testimonials
+   */
+
   @Post('testimonials')
   @ApiCreatedResponse({ type: Testimonials })
   async addTestimonial(
@@ -89,6 +117,10 @@ export class AboutUsPageController {
   async getTestimonialById(@Param('id') id: string): Promise<Testimonials> {
     return this.aboutUsService.getTestimonialById(id);
   }
+
+  /**
+   * * Why Choose Us
+   */
 
   @Post('why-choose-us')
   @ApiCreatedResponse({ type: WhyChooseUs })

@@ -14,6 +14,7 @@ import { HomePageModule } from './home-page/home-page.module';
 import { ContactUsPageModule } from './contact-us-page/contact-us.module';
 import { ServicePageModule } from './service-page/service.module';
 import { AboutUsPageModule } from './about-us-page/about-us.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { AboutUsPageModule } from './about-us-page/about-us.module';
     ServicePageModule,
     AboutUsPageModule,
     ServicePageModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

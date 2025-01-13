@@ -1,7 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BlogPost } from 'src/blog/entities';
 import {
   AboutOurCompany,
   ContactDetails,
+  HowItWorks,
+  OfferHeadings,
   OurThreePrinciples,
   Testimonials,
   WhyChooseUs,
@@ -41,43 +44,56 @@ export class ImageEntity {
 
   @OneToOne(() => ServiceCategory, (category) => category.image, {
     nullable: true,
-    cascade: true,
   })
   category?: ServiceCategory;
 
   @OneToOne(() => ContactDetails, (contact) => contact.image, {
     nullable: true,
-    cascade: true,
   })
   aboutUs: ContactDetails;
 
   @OneToOne(() => AboutOurCompany, (about) => about.image, {
     nullable: true,
-    cascade: true,
   })
   aboutOurCompany: AboutOurCompany;
 
   @OneToOne(() => OurThreePrinciples, (principle) => principle.image, {
     nullable: true,
-    cascade: true,
   })
   principle: OurThreePrinciples;
 
   @OneToOne(() => Testimonials, (testimonial) => testimonial.image, {
     nullable: true,
-    cascade: true,
   })
   testimonial: Testimonials;
 
   @OneToOne(() => WhyChooseUs, (choose) => choose.image, {
     nullable: true,
-    cascade: true,
   })
   chooseUs: WhyChooseUs;
 
+  @OneToOne(() => WhyChooseUs, (partner) => partner.image, {
+    nullable: true,
+  })
+  partner: WhyChooseUs;
+
+  @OneToOne(() => OfferHeadings, (offer) => offer.image, {
+    nullable: true,
+  })
+  offer: OfferHeadings;
+
+  @OneToOne(() => HowItWorks, (works) => works.image, {
+    nullable: true,
+  })
+  howItWorks: HowItWorks;
+
+  @OneToOne(() => BlogPost, (blog) => blog.image, {
+    nullable: true,
+  })
+  blog: BlogPost;
+
   @ManyToOne(() => Service, (service) => service.images, {
     nullable: true,
-    cascade: true,
   })
   service: Service;
 }

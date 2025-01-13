@@ -12,7 +12,7 @@ export class TokenService {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService<EnvironmentVariable, true>,
-  ) { }
+  ) {}
 
   setRefreshTokenCookie = (refreshToken: string, res: Response) => {
     res.cookie('refreshToken', refreshToken, {
@@ -72,7 +72,9 @@ export class TokenService {
       [TokenType.VALIDATION]: 'VALIDATION_TOKEN_JWT_SECRET',
     };
 
-    return this.configService.get(tokenToSecretMap[tokenType] as keyof EnvironmentVariable);
+    return this.configService.get(
+      tokenToSecretMap[tokenType] as keyof EnvironmentVariable,
+    );
   }
 
   private async generateToken(

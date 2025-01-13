@@ -8,6 +8,7 @@ import {
 } from '@casl/ability';
 
 import { Injectable } from '@nestjs/common';
+import { BlogCategory, BlogPost } from 'src/blog/entities';
 import { UserRole } from 'src/users/types/user-role';
 import { User } from 'src/users/user.entity';
 
@@ -22,7 +23,9 @@ export enum Action {
   Publish = 'publish',
 }
 
-export type Subjects = InferSubjects<typeof User> | 'all';
+export type Subjects =
+  | InferSubjects<typeof User | typeof BlogPost | typeof BlogCategory>
+  | 'all';
 
 type PossibleAbilities = [Action, Subjects];
 type Conditions = MongoQuery;
@@ -41,6 +44,8 @@ export class AbilityFactory {
         can(Action.Manage, 'all');
       // eslint-disable-next-line no-fallthrough
       case UserRole.ADMIN:
+        can(Action.Create, BlogPost);
+        can(Action.Create, BlogCategory);
 
       case UserRole.PROVIDER:
     }

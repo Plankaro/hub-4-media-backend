@@ -1,34 +1,31 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  JoinColumn,
-  OneToOne,
 } from 'typeorm';
-import { ImageEntity } from 'src/common/entities';
+import { BlogPost } from './blog-post.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
-export class OurThreePrinciples {
+export class BlogCategory {
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty()
-  @Column()
-  heading: string;
+  @Column({ unique: true })
+  name: string;
 
   @ApiProperty()
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
-  @ApiProperty({ type: () => ImageEntity })
-  @OneToOne(() => ImageEntity, (image) => image.principle, { cascade: true })
-  @JoinColumn()
-  image: ImageEntity;
+  @OneToMany(() => BlogPost, (blogPost) => blogPost.category)
+  posts: BlogPost[];
 
   @ApiProperty()
   @CreateDateColumn()

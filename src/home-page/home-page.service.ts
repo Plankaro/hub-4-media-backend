@@ -5,19 +5,17 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  AboutOurCompany,
   HeroHeadings,
   HowItWorks,
   OfferHeadings,
-  OurThreePrinciples,
+  Partners,
   Plans,
   SectionHeadings,
-  Testimonials,
-  WhyChooseUs,
 } from './entities';
 import { Repository } from 'typeorm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import {
+  CreatePartnerDto,
   HeroHeadingsDto,
   HowItWorksDto,
   OfferHeadingsDto,
@@ -26,6 +24,7 @@ import {
 import { PricePlanDto } from './dto/price-plan.dto';
 import { SuccessMessageDto } from 'src/auth/dtos';
 import { SectionName } from './types/section-name.enum';
+import { ImageEntity } from 'src/common/entities';
 
 @Injectable()
 export class HomePageService {
@@ -45,17 +44,11 @@ export class HomePageService {
     @InjectRepository(OfferHeadings)
     private offerHeadingsRepo: Repository<OfferHeadings>,
 
-    @InjectRepository(AboutOurCompany)
-    private aboutOurCompanyRepo: Repository<AboutOurCompany>,
+    @InjectRepository(ImageEntity)
+    private imageRepo: Repository<ImageEntity>,
 
-    @InjectRepository(OurThreePrinciples)
-    private ourThreePrinciplesRepo: Repository<OurThreePrinciples>,
-
-    @InjectRepository(WhyChooseUs)
-    private whyChooseRepo: Repository<WhyChooseUs>,
-
-    @InjectRepository(Testimonials)
-    private testimonialsRepo: Repository<Testimonials>,
+    @InjectRepository(Partners)
+    private partnerRepo: Repository<Partners>,
 
     private readonly cloudinaryService: CloudinaryService,
   ) {}
@@ -126,20 +119,48 @@ export class HomePageService {
     return heroHeading[0];
   }
 
-  async addHowItWorks({ title, description }: HowItWorksDto) {
+  async addHowItWorks({ title, description, image }: HowItWorksDto) {
+    let uploadedImage: ImageEntity;
+    try {
+      console.log('Image from category,', image);
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
+      });
+    } catch (error) {
+      console.log(`Error uploading category image: `, error);
+      throw new InternalServerErrorException();
+    }
     const howItWorks = this.howItWorksRepo.create({
       title,
       description,
+      image: uploadedImage,
     });
     return this.howItWorksRepo.save(howItWorks);
   }
 
   async updateHowItWorks(
     id: string,
-    { title, description }: HowItWorksDto,
+    { title, description, image }: HowItWorksDto,
   ): Promise<HowItWorks> {
     try {
       const howItWorks = await this.howItWorksRepo.findOne({ where: { id } });
+
+      let uploadedImage: ImageEntity;
+      try {
+        console.log('Image from category,', image);
+        const imageUpload = (
+          await this.cloudinaryService.uploadFiles(image)
+        )[0];
+        uploadedImage = await this.imageRepo.save({
+          imageName: imageUpload.original_filename,
+          imageUrl: imageUpload.url,
+        });
+      } catch (error) {
+        console.log(`Error uploading category image: `, error);
+        throw new InternalServerErrorException();
+      }
 
       if (!howItWorks) {
         throw new NotFoundException(
@@ -149,6 +170,7 @@ export class HomePageService {
 
       howItWorks.title = title;
       howItWorks.description = description;
+      howItWorks.image = uploadedImage;
 
       return this.howItWorksRepo.save(howItWorks);
     } catch (error) {
@@ -360,62 +382,143 @@ export class HomePageService {
     heading,
     subheading,
     description,
+    image,
   }: OfferHeadingsDto): Promise<OfferHeadings> {
+    let uploadedImage: ImageEntity;
     try {
-      const offerHeading = this.offerHeadingsRepo.create({
-        heading,
-        subheading,
-        description,
+      console.log('Image from category,', image);
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
       });
-      return this.offerHeadingsRepo.save(offerHeading);
     } catch (error) {
-      console.log(`Error adding offer heading`, error);
+      console.log(`Error uploading category image: `, error);
       throw new InternalServerErrorException();
     }
+    return await this.offerHeadingsRepo.manager.transaction(
+      async (transactionalEntityManager) => {
+        // Delete all entries
+        await transactionalEntityManager.delete(OfferHeadings, {});
+
+        // Create and save new entry
+        const heroHeading = this.offerHeadingsRepo.create({
+          heading,
+          subheading,
+          description,
+          image: uploadedImage,
+        });
+
+        return transactionalEntityManager.save(OfferHeadings, heroHeading);
+      },
+    );
   }
 
-  async updateOfferHeadings(
+  // async updateOfferHeadings(
+  //   id: string,
+  //   { heading, subheading, description }: OfferHeadingsDto,
+  // ): Promise<OfferHeadings> {
+  //   try {
+  //     const offerHeading = await this.offerHeadingsRepo.findOne({
+  //       where: { id },
+  //     });
+
+  //     if (!offerHeading) {
+  //       throw new NotFoundException(`No offer found with id: ${id}`);
+  //     }
+
+  //     Object.assign(offerHeading, { heading, subheading, description });
+
+  //     return this.offerHeadingsRepo.save(offerHeading);
+  //   } catch (error) {
+  //     console.log(`Error while updating offer heading with id: ${id}`, error);
+  //     throw new InternalServerErrorException();
+  //   }
+  // }
+
+  async getOfferHeading(): Promise<OfferHeadings> {
+    return this.offerHeadingsRepo.find()[0];
+  }
+
+  // async deleteOfferHeadings(id: string): Promise<SuccessMessageDto> {
+  //   try {
+  //     const offer = await this.offerHeadingsRepo.findOne({
+  //       where: { id },
+  //     });
+
+  //     if (!offer) {
+  //       throw new NotFoundException(`No plan found with id: ${id}`);
+  //     }
+
+  //     await this.plansRepo.softDelete({ id });
+
+  //     return { message: 'Deleted Successfully' };
+  //   } catch (error) {
+  //     console.log(`Error deleting offer heading with id: ${id}`, error);
+  //     throw new InternalServerErrorException();
+  //   }
+  // }
+
+  async createPartner({ name, image }: CreatePartnerDto): Promise<Partners> {
+    let uploadedImage: ImageEntity;
+    try {
+      console.log('Image from category,', image);
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
+      });
+    } catch (error) {
+      console.log(`Error uploading category image: `, error);
+      throw new InternalServerErrorException();
+    }
+
+    const partner = this.partnerRepo.create({ name, image: uploadedImage });
+    return this.partnerRepo.save(partner);
+  }
+
+  async updatePartner(
     id: string,
-    { heading, subheading, description }: OfferHeadingsDto,
-  ): Promise<OfferHeadings> {
+    { name, image }: CreatePartnerDto,
+  ): Promise<Partners> {
+    const existingPartner = await this.partnerRepo.findOne({ where: { id } });
+    if (!existingPartner) {
+      throw new NotFoundException(`No partner found with id: ${id}`);
+    }
+
+    let uploadedImage: ImageEntity;
     try {
-      const offerHeading = await this.offerHeadingsRepo.findOne({
-        where: { id },
+      console.log('Image from category,', image);
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
       });
-
-      if (!offerHeading) {
-        throw new NotFoundException(`No offer found with id: ${id}`);
-      }
-
-      Object.assign(offerHeading, { heading, subheading, description });
-
-      return this.offerHeadingsRepo.save(offerHeading);
     } catch (error) {
-      console.log(`Error while updating offer heading with id: ${id}`, error);
+      console.log(`Error uploading category image: `, error);
       throw new InternalServerErrorException();
     }
+
+    existingPartner.name = name;
+    existingPartner.image = uploadedImage;
+
+    return this.partnerRepo.save(existingPartner);
   }
 
-  async getAllOfferHeadings(): Promise<OfferHeadings[]> {
-    return this.offerHeadingsRepo.find();
-  }
-
-  async deleteOfferHeadings(id: string): Promise<SuccessMessageDto> {
-    try {
-      const offer = await this.offerHeadingsRepo.findOne({
-        where: { id },
-      });
-
-      if (!offer) {
-        throw new NotFoundException(`No plan found with id: ${id}`);
-      }
-
-      await this.plansRepo.softDelete({ id });
-
-      return { message: 'Deleted Successfully' };
-    } catch (error) {
-      console.log(`Error deleting offer heading with id: ${id}`, error);
-      throw new InternalServerErrorException();
+  async getPartnerById(id: string): Promise<Partners> {
+    const partner = await this.partnerRepo.findOne({ where: { id } });
+    if (!partner) {
+      throw new NotFoundException(`No partner found with id: ${id}`);
     }
+    return partner;
+  }
+
+  async getAllPartners(): Promise<Partners[]> {
+    return this.partnerRepo.find();
+  }
+
+  async deletePartner(id: string): Promise<SuccessMessageDto> {
+    await this.partnerRepo.softDelete({ id });
+    return { message: 'Partner deleted successfully' };
   }
 }

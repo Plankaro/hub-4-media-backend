@@ -34,7 +34,7 @@ export class Testimonials {
   designation: string;
 
   @ApiProperty({ type: () => ImageEntity })
-  @OneToOne(() => ImageEntity, (image) => image.testimonial)
+  @OneToOne(() => ImageEntity, (image) => image.testimonial, { cascade: true })
   @JoinColumn()
   image: ImageEntity;
 

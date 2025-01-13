@@ -6,3 +6,4 @@ export { SuccessMessageDto } from './sucess-message.dto';
 export { OfferHeadingsDto } from './offer-headings.dto';
 export { ContactDto } from '../../contact-us-page/dto/contact.dto';
 export { updateSectionHeadingsDto } from './section-headings.dto';
+export { CreatePartnerDto } from './create-partner.dto';

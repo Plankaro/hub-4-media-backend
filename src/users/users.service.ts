@@ -41,8 +41,29 @@ export class UsersService {
     });
   }
 
+  // findOne(id: string, withOtp?: boolean) {
+  //   if (!id) {
+  //     return null;
+  //   }
+  //   const queryBuilder = this.repo
+  //     .createQueryBuilder('user')
+  //     .addSelect(['user.password', 'user.refreshToken'])
+  //     .where('user.id = :id', { id })
+  //     .andWhere('user.isEmailVerified = :isVerified', { isVerified: true });
+
+  //   if (withOtp) {
+  //     queryBuilder.leftJoinAndSelect('user.otpDetails', 'otpDetails');
+  //   }
+
+  //   return queryBuilder.getOne();
+  // }
+
   findAccountByEmail(email: string) {
     return this.repo.findOne({ where: { email } });
+  }
+
+  findAccountByUsername(username: string) {
+    return this.repo.findOne({ where: { username } });
   }
 
   findVerifiedAccountByEmail(email: string, withOtp?: boolean) {
@@ -53,6 +74,20 @@ export class UsersService {
       }),
     });
   }
+
+  // findVerifiedAccountByEmail(email: string, withOtp?: boolean) {
+  //   const queryBuilder = this.repo
+  //     .createQueryBuilder('user')
+  //     .addSelect(['user.password', 'user.refreshToken'])
+  //     .where('user.email = :email', { email })
+  //     .andWhere('user.isEmailVerified = :isVerified', { isVerified: true });
+
+  //   if (withOtp) {
+  //     queryBuilder.leftJoinAndSelect('user.otpDetails', 'otpDetails');
+  //   }
+
+  //   return queryBuilder.getOne();
+  // }
 
   findVerifiedAccountById(id: string) {
     return this.repo.findOne({ where: { id, isEmailVerified: true } });

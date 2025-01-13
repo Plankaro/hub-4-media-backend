@@ -42,7 +42,7 @@ export class ContactDetails {
   googelMapLocation?: string;
 
   @ApiProperty({ type: () => ImageEntity })
-  @OneToOne(() => ImageEntity, (image) => image.aboutUs)
+  @OneToOne(() => ImageEntity, (image) => image.aboutUs, { cascade: true })
   @JoinColumn()
   image: ImageEntity;
 

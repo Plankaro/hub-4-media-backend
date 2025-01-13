@@ -149,6 +149,11 @@ export class AboutUsPageService {
     return this.ourPrincipleRepo.find();
   }
 
+  async deleteOurPrinciple(id: string): Promise<SuccessMessageDto> {
+    await this.ourPrincipleRepo.softDelete({ id });
+    return { message: 'Principle deleted successfully' };
+  }
+
   async createTestimonial({
     name,
     designation,

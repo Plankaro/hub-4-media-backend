@@ -34,7 +34,9 @@ export class AboutOurCompany {
   sideText: string;
 
   @ApiProperty({ type: () => ImageEntity })
-  @OneToOne(() => ImageEntity, (image) => image.aboutOurCompany)
+  @OneToOne(() => ImageEntity, (image) => image.aboutOurCompany, {
+    cascade: true,
+  })
   @JoinColumn()
   image: ImageEntity;
 

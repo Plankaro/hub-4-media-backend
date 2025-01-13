@@ -16,6 +16,7 @@ import {
   ContactDetails,
   OfferHeadings,
   Plans,
+  Partners,
 } from 'src/home-page/entities';
 import { EnvironmentVariable } from 'src/utils/env.validation';
 import {
@@ -27,6 +28,7 @@ import {
   TimeSlotsOfDay,
 } from 'src/service-page/entities';
 import { ImageEntity } from 'src/common/entities';
+import { BlogCategory, BlogPost } from 'src/blog/entities';
 
 config();
 
@@ -56,8 +58,11 @@ const commonTypeOrmConfig: DataSourceOptions = {
     TimeSlotsOfDay,
     ExtraService,
     Service,
+    Partners,
+    BlogCategory,
+    BlogPost,
   ],
-  synchronize: false,
+  synchronize: true,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {
