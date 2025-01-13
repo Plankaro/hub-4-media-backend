@@ -72,10 +72,16 @@ export class HomePageController {
     return this.homePageService.updateHowItWorks(id, body);
   }
 
-  @ApiOkResponse({ type: HowItWorks })
+  @ApiOkResponse({ type: [HowItWorks] })
   @Get('/how-it-works')
-  gethowItWorks(): Promise<HowItWorks> {
+  getAllHowItWorks(): Promise<HowItWorks[]> {
     return this.homePageService.getHowItWork();
+  }
+
+  @ApiOkResponse({ type: HowItWorks })
+  @Get('/how-it-works/:id')
+  getHowItWorksById(@Param('id') id: string): Promise<HowItWorks> {
+    return this.homePageService.getHowItWorkById(id);
   }
 
   @ApiOkResponse({ type: SuccessMessageDto })

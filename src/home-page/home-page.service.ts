@@ -179,14 +179,24 @@ export class HomePageService {
     }
   }
 
-  async getHowItWork(): Promise<HowItWorks> {
-    const howItWorks = await this.howItWorksRepo.find();
+  async getHowItWork(): Promise<HowItWorks[]> {
+    const howItWorks = await this.howItWorksRepo.find({ relations: ['image'] });
 
     if (!howItWorks && howItWorks.length <= 0) {
       throw new NotFoundException('No data found for How-It-Works');
     }
 
-    return howItWorks[0];
+    return howItWorks;
+  }
+
+  async getHowItWorkById(id: string): Promise<HowItWorks> {
+    const howItWorks = await this.howItWorksRepo.findOne({ where: { id } });
+
+    if (!howItWorks) {
+      throw new NotFoundException(`Not found How-It-Works with id : ${id}`);
+    }
+
+    return howItWorks;
   }
 
   async deletehowItWorks(id: string): Promise<SuccessMessageDto> {
@@ -437,7 +447,9 @@ export class HomePageService {
   // }
 
   async getOfferHeading(): Promise<OfferHeadings> {
-    return this.offerHeadingsRepo.find()[0];
+    const offer = await this.offerHeadingsRepo.find({ relations: ['image'] });
+
+    return offer[0];
   }
 
   // async deleteOfferHeadings(id: string): Promise<SuccessMessageDto> {
@@ -506,7 +518,10 @@ export class HomePageService {
   }
 
   async getPartnerById(id: string): Promise<Partners> {
-    const partner = await this.partnerRepo.findOne({ where: { id } });
+    const partner = await this.partnerRepo.findOne({
+      where: { id },
+      relations: ['image'],
+    });
     if (!partner) {
       throw new NotFoundException(`No partner found with id: ${id}`);
     }
@@ -514,7 +529,7 @@ export class HomePageService {
   }
 
   async getAllPartners(): Promise<Partners[]> {
-    return this.partnerRepo.find();
+    return this.partnerRepo.find({ relations: ['image'] });
   }
 
   async deletePartner(id: string): Promise<SuccessMessageDto> {

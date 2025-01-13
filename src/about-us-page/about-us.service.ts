@@ -73,7 +73,7 @@ export class AboutUsPageService {
   }
 
   async getAboutOurCompany(): Promise<AboutOurCompany[]> {
-    return this.aboutOurCompanyRepo.find();
+    return this.aboutOurCompanyRepo.find({ relations: ['image'] });
   }
 
   async createOurPrinciple({
@@ -146,7 +146,7 @@ export class AboutUsPageService {
   }
 
   async getAllOurPrinciples(): Promise<OurThreePrinciples[]> {
-    return this.ourPrincipleRepo.find();
+    return this.ourPrincipleRepo.find({ relations: ['image'] });
   }
 
   async deleteOurPrinciple(id: string): Promise<SuccessMessageDto> {
@@ -230,7 +230,7 @@ export class AboutUsPageService {
   }
 
   async getAllTestimonials(): Promise<Testimonials[]> {
-    return this.testiMonialsRepo.find();
+    return this.testiMonialsRepo.find({ relations: ['image'] });
   }
 
   async createWhyChooseUs({
