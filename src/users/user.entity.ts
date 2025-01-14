@@ -13,6 +13,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { UserOtp } from '../auth/user-otp.entity';
 import { UserRole } from './types/user-role';
 import { Service } from 'src/service-page/entities';
+import { Review } from 'src/service-page/entities/review.entity';
 
 @Entity()
 export class User {
@@ -104,4 +105,8 @@ export class User {
 
   @OneToMany(() => Service, (service) => service.provider)
   services: Service[];
+
+
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[]
 }

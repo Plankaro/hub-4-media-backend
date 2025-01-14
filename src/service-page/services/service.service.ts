@@ -36,24 +36,24 @@ export class ServicePageService {
     @InjectRepository(Service) private serviceRepo: Repository<Service>,
     private cloudinaryService: CloudinaryService,
     @InjectRepository(ImageEntity) private imageRepo: Repository<ImageEntity>,
-  ) {}
-
-  async create({
-    serviceTitle,
-    price,
-    currency,
-    description,
-    duration,
-    providerId,
-    categoryId,
-    subCategoryId,
-    extraServices,
-    availability,
-    location,
-    images,
-    seo,
-  }: CreateServiceDto): Promise<Service> {
+  ) { }
+  async create(body: CreateServiceDto): Promise<Service> {
     const uploadedImage: ImageEntity[] = [];
+    const {
+      serviceTitle,
+      description,
+      pricings,
+      providerId,
+      categoryId,
+      subCategoryId,
+      extraServices,
+      availability,
+      images,
+      seo,
+      location,
+      ...rest
+    } = body;
+
     try {
       console.log(images[0]);
       const imageUpload = await this.cloudinaryService.uploadFiles(images);
@@ -76,8 +76,6 @@ export class ServicePageService {
     const subCategory = await this.subCategoryService.getById(subCategoryId);
     const user = await this.userService.findVerifiedAccountById(providerId);
 
-    console.log(user);
-
     if (!user) {
       throw new NotFoundException(`Provider not found with id: ${providerId}`);
     }
@@ -85,40 +83,28 @@ export class ServicePageService {
     return await this.serviceRepo.manager.transaction(
       async (transactionalEntityManager) => {
         try {
-          // Saving extra services within the transaction
+          // Save extra services within the transaction
           const savedExtraServices = await Promise.all(
             extraServices.map(async (extraService) => {
-              return await this.storeExtraService(
-                extraService,
-                transactionalEntityManager,
-              );
+              return await this.storeExtraService(extraService, transactionalEntityManager);
             }),
           );
 
-          // Saving availability within the transaction
+          // Save availability within the transaction
           const savedAvailability = await Promise.all(
             availability.map(async (avail) => {
-              return await this.saveAvailability(
-                avail,
-                transactionalEntityManager,
-              );
+              return await this.saveAvailability(avail, transactionalEntityManager);
             }),
           );
 
           const serviceObj = this.serviceRepo.create({
             serviceTitle,
-            price,
-            currency,
             description,
-            duration,
             address: location.address,
             country: location.country,
             city: location.city,
             state: location.state,
             pincode: location.pincode,
-            googleMapPlaceId: location.googleMapPlaceId,
-            latitude: location.latitude,
-            longitude: location.longitude,
             metaDescription: seo.description,
             metaKeywords: seo.keywords,
             metaTitle: seo.title,
@@ -128,9 +114,10 @@ export class ServicePageService {
             extraServices: savedExtraServices,
             availability: savedAvailability,
             images: uploadedImage,
+            ...rest,
           });
 
-          // Saving the service object within the transaction
+          // Save the service object within the transaction
           return await transactionalEntityManager.save(Service, serviceObj);
         } catch (error) {
           console.log('Error during transaction:', error);
@@ -144,10 +131,7 @@ export class ServicePageService {
     id: string,
     {
       serviceTitle,
-      price,
-      currency,
       description,
-      duration,
       providerId,
       categoryId,
       subCategoryId,
@@ -213,7 +197,6 @@ export class ServicePageService {
           Object.assign(existingService, {
             category,
             subCategory,
-            duration,
             provider: user,
             extraServices: savedExtraServices,
             availability: savedAvailability,
@@ -223,16 +206,11 @@ export class ServicePageService {
             city: location.city,
             state: location.state,
             pincode: location.pincode,
-            googleMapPlaceId: location.googleMapPlaceId,
-            latitude: location.latitude,
-            longitude: location.longitude,
             metaDescription: seo.description,
             metaKeywords: seo.keywords,
             metaTitle: seo.title,
 
             serviceTitle,
-            price,
-            currency,
             description,
           });
           // Saving the service object within the transaction

@@ -37,6 +37,10 @@ export class ServiceCategory {
   @Column('boolean')
   isFeatured: boolean;
 
+  @ApiProperty()
+  @Column('int', { nullable: true })
+  priority: number;
+
   @ApiProperty({ type: () => [ServiceSubCategory] })
   @OneToMany(() => ServiceSubCategory, (subCategory) => subCategory.category)
   @JoinColumn()

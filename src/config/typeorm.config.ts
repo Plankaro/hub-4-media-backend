@@ -29,6 +29,8 @@ import {
 } from 'src/service-page/entities';
 import { ImageEntity } from 'src/common/entities';
 import { BlogCategory, BlogPost } from 'src/blog/entities';
+import { Review } from 'src/service-page/entities/review.entity';
+import { ServicePricing } from 'src/service-page/entities/pricing.entity';
 
 config();
 
@@ -61,8 +63,10 @@ const commonTypeOrmConfig: DataSourceOptions = {
     Partners,
     BlogCategory,
     BlogPost,
+    Review,
+    ServicePricing
   ],
-  synchronize: false,
+  synchronize: true,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {

@@ -6,9 +6,12 @@ import {
   DeleteDateColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { Service } from './service.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { ImageEntity } from 'src/common/entities';
 
 @Entity()
 export class ExtraService {
@@ -27,6 +30,11 @@ export class ExtraService {
   @ApiProperty()
   @Column()
   duration: string;
+
+  @ApiProperty({ type: () => [ImageEntity] })
+  @OneToMany(() => ImageEntity, (image) => image.extraService)
+  @JoinColumn()
+  images: ImageEntity[];
 
   @ApiProperty({ type: () => Service })
   @ManyToOne(() => Service, (service) => service.extraServices, {
