@@ -35,13 +35,13 @@ export class Service {
   @JoinColumn()
   pricings: ServicePricing[];
 
-  @ApiProperty()
-  @Column({ nullable: true })
-  currency?: string;
+  // @ApiProperty()
+  // @Column({ nullable: true })
+  // currency?: string;
 
-  @ApiProperty()
-  @Column()
-  duration: string;
+  // @ApiProperty()
+  // @Column()
+  // duration: string;
 
   @ApiProperty()
   @Column('text')

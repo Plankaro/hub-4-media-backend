@@ -18,6 +18,7 @@ import {
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { UsersModule } from 'src/users/users.module';
 import { ServiceSubCategoryController } from './controllers/sub-category.controller';
+import { ServicePricing } from './entities/pricing.entity';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ServiceSubCategoryController } from './controllers/sub-category.control
       TimeSlot,
       TimeSlotsOfDay,
       ExtraService,
+      ServicePricing,
     ]),
     forwardRef(() => UsersModule),
     CloudinaryModule,

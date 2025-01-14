@@ -66,7 +66,7 @@ const commonTypeOrmConfig: DataSourceOptions = {
     Review,
     ServicePricing
   ],
-  synchronize: true,
+  synchronize: false,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {

@@ -20,6 +20,8 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ImageEntity } from 'src/common/entities';
 import { SuccessMessageDto } from 'src/common/dtos';
 import { ServiceFilterDto } from '../dto/service-filter.dto';
+import { ServicePricing } from '../entities/pricing.entity';
+import { CreateServicePricingDto } from '../dto/pricing.dto';
 
 @Injectable()
 export class ServicePageService {
@@ -36,7 +38,9 @@ export class ServicePageService {
     @InjectRepository(Service) private serviceRepo: Repository<Service>,
     private cloudinaryService: CloudinaryService,
     @InjectRepository(ImageEntity) private imageRepo: Repository<ImageEntity>,
-  ) { }
+    @InjectRepository(ServicePricing)
+    private pricingRepo: Repository<ServicePricing>,
+  ) {}
   async create(body: CreateServiceDto): Promise<Service> {
     const uploadedImage: ImageEntity[] = [];
     const {
@@ -86,14 +90,27 @@ export class ServicePageService {
           // Save extra services within the transaction
           const savedExtraServices = await Promise.all(
             extraServices.map(async (extraService) => {
-              return await this.storeExtraService(extraService, transactionalEntityManager);
+              return await this.storeExtraService(
+                extraService,
+                transactionalEntityManager,
+              );
             }),
           );
 
           // Save availability within the transaction
           const savedAvailability = await Promise.all(
             availability.map(async (avail) => {
-              return await this.saveAvailability(avail, transactionalEntityManager);
+              return await this.saveAvailability(
+                avail,
+                transactionalEntityManager,
+              );
+            }),
+          );
+
+          // Save availability within the transaction
+          const savedPricing = await Promise.all(
+            pricings.map(async (price) => {
+              return await this.savePricing(price, transactionalEntityManager);
             }),
           );
 
@@ -114,6 +131,8 @@ export class ServicePageService {
             extraServices: savedExtraServices,
             availability: savedAvailability,
             images: uploadedImage,
+            googleMapLink: location.googleMapLink,
+            pricings: savedPricing,
             ...rest,
           });
 
@@ -227,7 +246,10 @@ export class ServicePageService {
   }
 
   async getById(id: string): Promise<Service> {
-    const service = await this.serviceRepo.findOne({ where: { id } });
+    const service = await this.serviceRepo.findOne({
+      where: { id },
+      relations: ['images', 'category', 'subCategory', 'pricings', 'provider', 'extraServices', 'availability', 'availability.timeSlots'],
+    });
     if (!service) {
       throw new NotFoundException(`No service found with id: ${id}`);
     }
@@ -235,19 +257,67 @@ export class ServicePageService {
     return service;
   }
 
-  async getAllServices({ categoryId }: ServiceFilterDto): Promise<Service[]> {
-    const query = this.serviceRepo.createQueryBuilder('service');
+  async getAllServices(filters: ServiceFilterDto): Promise<Service[]> {
+    // const query = this.serviceRepo.createQueryBuilder('service');
+    const query = this.serviceRepo
+      .createQueryBuilder('service')
+      .leftJoinAndSelect('service.images', 'images')
+      .leftJoinAndSelect('service.category', 'category')
+      .leftJoinAndSelect('service.subCategory', 'subCategory')
+      .leftJoinAndSelect('service.pricings', 'pricings')
+      .leftJoinAndSelect('service.provider', 'provider')
+      .leftJoinAndSelect('service.availability', 'availability')
+      .leftJoinAndSelect('service.extraServices', 'extraServices')
+      .leftJoinAndSelect('availability.timeSlots', 'timeSlots');
+
+    if (filters?.categoryId) {
+      query.where('category.id = :categoryId', {
+        categoryId: filters.categoryId,
+      });
+    }
+
+    if (filters?.subCategoryId) {
+      query.andWhere('subCategory.id = :subCategoryId', {
+        subCategoryId: filters.subCategoryId,
+      });
+    }
+
+    if (filters?.keyWords) {
+      query.andWhere('service.serviceTitle IN (:...keyWords)', {
+        keyWords: filters.keyWords,
+      });
+    }
+
+    if (filters?.minPrice) {
+      query.andWhere('pricings.offerPrice >= :minPrice', {
+        minPrice: filters.minPrice,
+      });
+    }
+
+    if (filters?.maxPrice) {
+      query.andWhere('pricings.offerPrice <= :maxPrice', {
+        maxPrice: filters.maxPrice,
+      });
+    }
+
+    // query.leftJoinAndSelect('service.category', 'category');
+    // query.leftJoinAndSelect('service.provider', 'provider');
 
     // Join the category relationship
-    query.leftJoinAndSelect('service.category', 'category');
+    // query.leftJoinAndSelect('service.category', 'category');
+    // query.leftJoinAndSelect('service.provider', 'provider');
 
     // Apply filtering by category if `categoryId` is provided
-    if (categoryId) {
-      query.where('category.id = :categoryId', { categoryId });
-    }
+    // if (categoryId) {
+    //   query.where('category.id = :categoryId', { categoryId });
+    // }
 
     // Fetch the results
     return query.getMany();
+
+    // return this.serviceRepo.find({
+    //   relations: ['category', 'provider', 'images', 'extraServices'],
+    // });
   }
 
   async delete(id: string): Promise<SuccessMessageDto> {
@@ -298,6 +368,17 @@ export class ServicePageService {
       TimeSlotsOfDay,
       availabilityObj,
     );
+  }
+
+  async savePricing(
+    price: CreateServicePricingDto,
+    transactionalEntityManager: EntityManager,
+  ): Promise<ServicePricing> {
+    // Handling multiple time slot entries
+    const pricingObj = this.pricingRepo.create({
+      ...price,
+    });
+    return await transactionalEntityManager.save(ServicePricing, pricingObj);
   }
 
   async saveTimeSlots(

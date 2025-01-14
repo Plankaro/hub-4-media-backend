@@ -11,7 +11,7 @@ import {
 import { ServicePageService } from '../services';
 import { CreateServiceDto } from '../dto';
 import { Service } from '../entities';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { SuccessMessageDto } from 'src/common/dtos';
 import { ServiceFilterDto } from '../dto/service-filter.dto';
 
@@ -42,6 +42,7 @@ export class ServicePageController {
 
   @Get('/')
   @ApiOkResponse({ type: [Service] })
+  // @ApiQuery({ type: ServiceFilterDto })
   getAllServices(@Query() query: ServiceFilterDto): Promise<Service[]> {
     return this.service.getAllServices(query);
   }

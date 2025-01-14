@@ -124,10 +124,10 @@ export class CreateServiceDto {
   @Type(() => ServiceLocationDto)
   location: ServiceLocationDto;
 
-  @ApiProperty({ type: () => ImageUploadDto })
-  @ValidateNested()
-  @Type(() => ImageUploadDto)
-  image: ImageUploadDto;
+  // @ApiProperty({ type: () => ImageUploadDto })
+  // @ValidateNested()
+  // @Type(() => ImageUploadDto)
+  // image: ImageUploadDto;
 
   @ApiProperty({ type: () => [ImageUploadDto] })
   @IsArray()

@@ -4,9 +4,9 @@ import { Service } from './service.entity'; // Assuming the Service entity is in
 
 @Entity("service_pricing")
 export class ServicePricing {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
     @ApiProperty({ description: 'Unique identifier for the service pricing.' })
-    id: number;
+    id: string;
 
     @Column('decimal', { precision: 10, scale: 2 })
     @ApiProperty({ description: 'Price amount for the service.', example: 99.99 })
