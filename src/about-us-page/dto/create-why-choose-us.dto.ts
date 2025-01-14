@@ -34,7 +34,7 @@ export class CreateWhyChooseUsDto {
 
   @ApiProperty({ type: [WhyChooseUsCardsDto] })
   @IsNotEmpty()
-  @IsArray({ each: true })
+  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => WhyChooseUsCardsDto)
   cards: WhyChooseUsCardsDto[];
