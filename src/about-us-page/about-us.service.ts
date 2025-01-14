@@ -270,6 +270,6 @@ export class AboutUsPageService {
   }
 
   async getWhyChooseUs(): Promise<WhyChooseUs[]> {
-    return this.chooseUsRepo.find();
+    return this.chooseUsRepo.find({ relations: ['image'] });
   }
 }
