@@ -44,6 +44,7 @@
     "date-fns": "^4.1.0",
     "dompurify": "^3.2.3",
     "dotenv": "^16.4.7",
+    "epxress": "^0.0.1-security",
     "husky": "^9.1.7",
     "jsdom": "^26.0.0",
     "lint-staged": "^15.3.0",
