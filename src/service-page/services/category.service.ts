@@ -29,14 +29,13 @@ export class ServiceCategoryService {
     let uploadedImage: ImageEntity;
     try {
       console.log('Image from category,', image);
-      // const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
-      // uploadedImage = await this.imageRepo.save({
-      //   imageName: imageUpload.original_filename,
-      //   imageUrl: imageUpload.url,
-      // });
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
       uploadedImage = await this.imageRepo.save({
-        imageName: 'imageUpload.original_filename',
-        imageUrl: 'imageUpload.url',
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
+      });
+      uploadedImage = await this.imageRepo.save({
+        imageName: image.data,
       });
     } catch (error) {
       console.log(`Error uploading category image: `, error);
@@ -109,7 +108,7 @@ export class ServiceCategoryService {
 
   getAllCategories(): Promise<ServiceCategory[]> {
     return this.categoryRepo.find({
-      relations: ['subCategories'],
+      relations: ['image', 'subCategories'],
     });
   }
 
