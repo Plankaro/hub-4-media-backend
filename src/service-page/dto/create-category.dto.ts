@@ -24,8 +24,7 @@ export class CreateCategoryDto {
   @Type(() => ImageUploadDto)
   image: ImageUploadDto;
 
-  @ApiProperty()
+  @ApiProperty({ required: true })
   @IsBoolean()
-  @IsNotEmpty()
   isFeatured: boolean;
 }

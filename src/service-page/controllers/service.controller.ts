@@ -9,9 +9,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { ServicePageService } from '../services';
-import { CreateServiceDto } from '../dto';
+import { CreateCategoryDto, CreateServiceDto } from '../dto';
 import { Service } from '../entities';
-import { ApiCreatedResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { SuccessMessageDto } from 'src/common/dtos';
 import { ServiceFilterDto } from '../dto/service-filter.dto';
 
@@ -21,6 +21,7 @@ export class ServicePageController {
 
   @Post('/')
   @ApiCreatedResponse({ type: Service })
+  @ApiBody({ type: CreateCategoryDto })
   createService(@Body() body: CreateServiceDto): Promise<Service> {
     return this.service.create(body);
   }

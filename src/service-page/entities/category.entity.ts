@@ -34,7 +34,7 @@ export class ServiceCategory {
   image: ImageEntity;
 
   @ApiProperty()
-  @Column('boolean')
+  @Column('boolean', { default: false })
   isFeatured: boolean;
 
   @ApiProperty()
