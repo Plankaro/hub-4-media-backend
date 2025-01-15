@@ -12,6 +12,7 @@ import {
 } from './entities';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { ImageEntity } from 'src/common/entities';
+import { VerifiedAgencies } from './entities/verified-agencies.entity';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ImageEntity } from 'src/common/entities';
       Plans,
       Partners,
       ImageEntity,
+      VerifiedAgencies,
     ]),
     CloudinaryModule,
   ],

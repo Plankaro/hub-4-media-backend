@@ -7,9 +7,11 @@ import {
   HowItWorks,
   OfferHeadings,
   OurThreePrinciples,
+  Partners,
   Testimonials,
   WhyChooseUs,
 } from 'src/home-page/entities';
+import { VerifiedAgencies } from 'src/home-page/entities/verified-agencies.entity';
 import {
   ExtraService,
   Service,
@@ -77,10 +79,15 @@ export class ImageEntity {
   })
   chooseUs: WhyChooseUs;
 
-  @OneToOne(() => WhyChooseUs, (partner) => partner.image, {
+  @OneToOne(() => Partners, (partner) => partner.image, {
     nullable: true,
   })
-  partner: WhyChooseUs;
+  partner: Partners;
+
+  @OneToOne(() => VerifiedAgencies, (agency) => agency.image, {
+    nullable: true,
+  })
+  agency: VerifiedAgencies;
 
   @OneToOne(() => OfferHeadings, (offer) => offer.image, {
     nullable: true,

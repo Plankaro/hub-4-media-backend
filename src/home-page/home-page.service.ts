@@ -15,16 +15,19 @@ import {
 import { Repository } from 'typeorm';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import {
+  CreateAgencyDto,
   CreatePartnerDto,
   HeroHeadingsDto,
   HowItWorksDto,
   OfferHeadingsDto,
   SectionHeadingDto,
+  UpdateAgencyDto,
 } from './dto';
 import { PricePlanDto } from './dto/price-plan.dto';
 import { SuccessMessageDto } from 'src/auth/dtos';
 import { SectionName } from './types/section-name.enum';
 import { ImageEntity } from 'src/common/entities';
+import { VerifiedAgencies } from './entities/verified-agencies.entity';
 
 @Injectable()
 export class HomePageService {
@@ -49,6 +52,9 @@ export class HomePageService {
 
     @InjectRepository(Partners)
     private partnerRepo: Repository<Partners>,
+
+    @InjectRepository(VerifiedAgencies)
+    private agencyRepo: Repository<VerifiedAgencies>,
 
     private readonly cloudinaryService: CloudinaryService,
   ) {}
@@ -487,6 +493,91 @@ export class HomePageService {
   //     throw new InternalServerErrorException();
   //   }
   // }
+
+  async createAgency({
+    name,
+    image,
+  }: CreateAgencyDto): Promise<VerifiedAgencies> {
+    let uploadedImage: ImageEntity;
+    try {
+      console.log('Image from agency,', image);
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
+      });
+    } catch (error) {
+      console.log(`Error uploading agency image: `, error);
+      throw new InternalServerErrorException();
+    }
+
+    const agnecy = this.agencyRepo.create({ name, image: uploadedImage });
+    return this.agencyRepo.save(agnecy);
+  }
+
+  async updateAgency(
+    id: string,
+    { name, image }: UpdateAgencyDto,
+  ): Promise<VerifiedAgencies> {
+    const existingAgency = await this.agencyRepo.findOne({ where: { id } });
+    if (!existingAgency) {
+      throw new NotFoundException(`No agency found with id: ${id}`);
+    }
+
+    let uploadedImage: ImageEntity;
+    if (image) {
+      try {
+        console.log('Image from agency,', image);
+        const imageUpload = (
+          await this.cloudinaryService.uploadFiles(image)
+        )[0];
+        uploadedImage = await this.imageRepo.save({
+          imageName: imageUpload.original_filename,
+          imageUrl: imageUpload.url,
+        });
+      } catch (error) {
+        console.log(`Error uploading agency image: `, error);
+        throw new InternalServerErrorException();
+      }
+    }
+    if (name) {
+      existingAgency.name = name;
+    }
+    if (image) {
+      existingAgency.image = uploadedImage;
+    }
+
+    return this.agencyRepo.save(existingAgency);
+  }
+
+  async getAgencyById(id: string): Promise<VerifiedAgencies> {
+    const partner = await this.agencyRepo.findOne({
+      where: { id },
+      relations: ['image'],
+    });
+    if (!partner) {
+      throw new NotFoundException(`No Agency found with id: ${id}`);
+    }
+    return partner;
+  }
+
+  async getAllAgencies(): Promise<VerifiedAgencies[]> {
+    return this.agencyRepo.find({ relations: ['image'] });
+  }
+
+  async deleteAgency(id: string): Promise<SuccessMessageDto> {
+    try {
+      await this.agencyRepo.softDelete({ id });
+    } catch (error) {
+      console.log(`Error deleting agency`, error);
+      throw new InternalServerErrorException('Deleting Agency');
+    }
+    return { message: 'Agency deleted successfully' };
+  }
+
+  /**
+   * * Services For Managing Partners
+   */
 
   async createPartner({ name, image }: CreatePartnerDto): Promise<Partners> {
     let uploadedImage: ImageEntity;

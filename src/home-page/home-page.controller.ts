@@ -9,11 +9,13 @@ import {
 } from '@nestjs/common';
 
 import {
+  CreateAgencyDto,
   CreatePartnerDto,
   HeroHeadingsDto,
   HowItWorksDto,
   OfferHeadingsDto,
   SuccessMessageDto,
+  UpdateAgencyDto,
 } from './dto';
 import { HomePageService } from './home-page.service';
 import {
@@ -29,6 +31,7 @@ import { SectionHeadingDto } from './dto/section-headings.dto';
 import { PricePlanDto } from './dto/price-plan.dto';
 
 import { SectionName } from './types/section-name.enum';
+import { VerifiedAgencies } from './entities/verified-agencies.entity';
 
 @Controller('home')
 export class HomePageController {
@@ -173,6 +176,33 @@ export class HomePageController {
   @Delete('partner/:id')
   async deletePartner(@Param('id') id: string): Promise<SuccessMessageDto> {
     return this.homePageService.deletePartner(id);
+  }
+
+  @Post('/agencies')
+  @ApiCreatedResponse({ type: VerifiedAgencies })
+  async addAgency(@Body() body: CreateAgencyDto): Promise<VerifiedAgencies> {
+    return this.homePageService.createAgency(body);
+  }
+
+  @Put('/agencies/:id')
+  @ApiCreatedResponse({ type: VerifiedAgencies })
+  async updateAgency(
+    @Param('id') id: string,
+    @Body() body: UpdateAgencyDto,
+  ): Promise<VerifiedAgencies> {
+    return this.homePageService.updateAgency(id, body);
+  }
+
+  @ApiOkResponse({ type: [VerifiedAgencies] })
+  @Get('/agencies')
+  getAllAgencies(): Promise<VerifiedAgencies[]> {
+    return this.homePageService.getAllAgencies();
+  }
+
+  @ApiOkResponse({ type: SuccessMessageDto })
+  @Delete('agencies/:id')
+  async deleteAgency(@Param('id') id: string): Promise<SuccessMessageDto> {
+    return this.homePageService.deleteAgency(id);
   }
 
   @ApiCreatedResponse({ type: OfferHeadings })

@@ -7,3 +7,5 @@ export { OfferHeadingsDto } from './offer-headings.dto';
 export { ContactDto } from '../../contact-us-page/dto/contact.dto';
 export { updateSectionHeadingsDto } from './section-headings.dto';
 export { CreatePartnerDto } from './create-partner.dto';
+export { CreateAgencyDto } from './create-agency.dto';
+export { UpdateAgencyDto } from './update-agency.dto';
