@@ -8,6 +8,7 @@ import {
   CreateOurPrincipleDto,
   CreateTestimonialDto,
   CreateWhyChooseUsDto,
+  UpdateOurPrincipleDto,
 } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -18,6 +19,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { SuccessMessageDto } from 'src/common/dtos';
 import { Testimonials } from './entities/testimonials.entity';
 import { WhyChooseUs } from './entities/why-choose-us.entity';
+import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 
 @Injectable()
 export class AboutUsPageService {
@@ -113,32 +115,39 @@ export class AboutUsPageService {
 
   async updateOurPrinciple(
     id: string,
-    { heading, description, image }: CreateOurPrincipleDto,
+    { heading, description, image }: UpdateOurPrincipleDto,
   ) {
     const existingPrinciple = await this.ourPrincipleRepo.findOne({
       where: { id },
     });
-    if (existingPrinciple) {
+    if (!existingPrinciple) {
       throw new NotFoundException(`No principle found with id: ${id}`);
     }
     let uploadedImage: ImageEntity;
-    try {
-      console.log('Image from category,', image);
-      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
-      uploadedImage = await this.imageRepo.save({
-        imageName: imageUpload.original_filename,
-        imageUrl: imageUpload.url,
-      });
-    } catch (error) {
-      console.log(`Error uploading category image: `, error);
-      throw new InternalServerErrorException();
+    if (image) {
+      try {
+        console.log('Image from category,', image);
+        const imageUpload = (
+          await this.cloudinaryService.uploadFiles(image)
+        )[0];
+        uploadedImage = await this.imageRepo.save({
+          imageName: imageUpload.original_filename,
+          imageUrl: imageUpload.url,
+        });
+      } catch (error) {
+        console.log(`Error uploading category image: `, error);
+        throw new InternalServerErrorException();
+      }
     }
 
     Object.assign(existingPrinciple, {
       heading,
       description,
-      image: uploadedImage,
     });
+
+    if (image) {
+      existingPrinciple.image = uploadedImage;
+    }
 
     return this.ourPrincipleRepo.save(existingPrinciple);
   }
@@ -195,25 +204,29 @@ export class AboutUsPageService {
 
   async updateTestimonial(
     id: string,
-    { name, designation, description, rating, image }: CreateTestimonialDto,
+    { name, designation, description, rating, image }: UpdateTestimonialDto,
   ): Promise<Testimonials> {
     const existingTestimonial = await this.testiMonialsRepo.findOne({
       where: { id },
     });
-    if (existingTestimonial) {
-      throw new NotFoundException(`No principle found with id: ${id}`);
+    if (!existingTestimonial) {
+      throw new NotFoundException(`No testimonial found with id: ${id}`);
     }
     let uploadedImage: ImageEntity;
-    try {
-      console.log('Image from category,', image);
-      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
-      uploadedImage = await this.imageRepo.save({
-        imageName: imageUpload.original_filename,
-        imageUrl: imageUpload.url,
-      });
-    } catch (error) {
-      console.log(`Error uploading category image: `, error);
-      throw new InternalServerErrorException();
+    if (image) {
+      try {
+        console.log('Image from category,', image);
+        const imageUpload = (
+          await this.cloudinaryService.uploadFiles(image)
+        )[0];
+        uploadedImage = await this.imageRepo.save({
+          imageName: imageUpload.original_filename,
+          imageUrl: imageUpload.url,
+        });
+      } catch (error) {
+        console.log(`Error uploading category image: `, error);
+        throw new InternalServerErrorException();
+      }
     }
 
     Object.assign(existingTestimonial, {
@@ -221,8 +234,11 @@ export class AboutUsPageService {
       designation,
       description,
       rating,
-      image: uploadedImage,
     });
+
+    if (image) {
+      existingTestimonial.image = uploadedImage;
+    }
 
     return this.testiMonialsRepo.save(existingTestimonial);
   }

@@ -7,6 +7,7 @@ import {
   IsNumber,
   Min,
   Max,
+  IsOptional,
 } from 'class-validator';
 import { ImageUploadDto } from 'src/common/dtos';
 
@@ -34,7 +35,7 @@ export class CreateTestimonialDto {
   designation: string;
 
   @ApiProperty({ type: ImageUploadDto })
-  @IsNotEmpty()
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => ImageUploadDto)
   image: ImageUploadDto;

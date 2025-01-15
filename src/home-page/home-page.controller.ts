@@ -36,7 +36,7 @@ export class HomePageController {
 
   @ApiOkResponse({ type: HeroHeadings })
   @Post('/hero-headings')
-  addHeroHeadlines(@Body() body: HeroHeadingsDto): Promise<HeroHeadings> {
+  addHeroHeadings(@Body() body: HeroHeadingsDto): Promise<HeroHeadings> {
     return this.homePageService.addHeroHeadlines(body);
   }
 

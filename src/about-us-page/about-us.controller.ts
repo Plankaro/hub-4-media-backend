@@ -13,6 +13,7 @@ import {
   CreateOurPrincipleDto,
   CreateTestimonialDto,
   CreateWhyChooseUsDto,
+  UpdateOurPrincipleDto,
 } from './dto';
 import { AboutOurCompany } from './entities/about-our-company.entity';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
@@ -20,6 +21,7 @@ import { OurThreePrinciples } from './entities/our-three-principles.entity';
 import { Testimonials } from './entities/testimonials.entity';
 import { WhyChooseUs } from './entities/why-choose-us.entity';
 import { SuccessMessageDto } from 'src/common/dtos';
+import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 
 @Controller('about-us')
 export class AboutUsPageController {
@@ -58,7 +60,7 @@ export class AboutUsPageController {
   @ApiCreatedResponse({ type: OurThreePrinciples })
   async updateOurPrinciple(
     @Param('id') id: string,
-    @Body() body: CreateOurPrincipleDto,
+    @Body() body: UpdateOurPrincipleDto,
   ): Promise<OurThreePrinciples> {
     return this.aboutUsService.updateOurPrinciple(id, body);
   }
@@ -101,7 +103,7 @@ export class AboutUsPageController {
   @ApiCreatedResponse({ type: Testimonials })
   async updateTestimonial(
     @Param('id') id: string,
-    @Body() body: CreateTestimonialDto,
+    @Body() body: UpdateTestimonialDto,
   ): Promise<Testimonials> {
     return this.aboutUsService.updateTestimonial(id, body);
   }
