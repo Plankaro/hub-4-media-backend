@@ -34,9 +34,6 @@ export class ServiceCategoryService {
         imageName: imageUpload.original_filename,
         imageUrl: imageUpload.url,
       });
-      uploadedImage = await this.imageRepo.save({
-        imageName: image.data,
-      });
     } catch (error) {
       console.log(`Error uploading category image: `, error);
       throw new InternalServerErrorException();
@@ -77,7 +74,7 @@ export class ServiceCategoryService {
       }
     }
 
-    if (uploadedImage) {
+    if (image) {
       existingCategory.image = uploadedImage;
     }
     if (title) {
