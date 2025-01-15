@@ -8,7 +8,9 @@ import {
   CreateOurPrincipleDto,
   CreateTestimonialDto,
   CreateWhyChooseUsDto,
+  UpdateAboutOurCompanyDto,
   UpdateOurPrincipleDto,
+  UpdateWhyChooseUsDto,
 } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -82,8 +84,83 @@ export class AboutUsPageService {
     );
   }
 
+  async updateAboutOurCompany(
+    id: string,
+    {
+      heading,
+      descriptionOne,
+      descriptionTwo,
+      sideText,
+      image,
+    }: UpdateAboutOurCompanyDto,
+  ): Promise<AboutOurCompany> {
+    const existingAboutUs = await this.aboutOurCompanyRepo.findOne({
+      where: { id },
+    });
+    if (!existingAboutUs) {
+      throw new NotFoundException(`No data found for given id: ${id}`);
+    }
+    // Create and save new entry
+    let uploadedImage: ImageEntity;
+
+    if (image) {
+      try {
+        console.log('Image from category,', image);
+        const imageUpload = (
+          await this.cloudinaryService.uploadFiles(image)
+        )[0];
+        uploadedImage = await this.imageRepo.save({
+          imageName: imageUpload.original_filename,
+          imageUrl: imageUpload.url,
+        });
+      } catch (error) {
+        console.log(`Error uploading category image: `, error);
+        throw new InternalServerErrorException();
+      }
+    }
+    return await this.aboutOurCompanyRepo.manager.transaction(
+      async (transactionalEntityManager) => {
+        if (heading) {
+          existingAboutUs.heading = heading;
+        }
+
+        if (descriptionOne) {
+          existingAboutUs.descriptionOne = descriptionOne;
+        }
+
+        if (descriptionTwo) {
+          existingAboutUs.descriptionTwo = descriptionTwo;
+        }
+
+        if (sideText) {
+          existingAboutUs.sideText = sideText;
+        }
+
+        if (image) {
+          existingAboutUs.image = uploadedImage;
+        }
+
+        return transactionalEntityManager.save(
+          AboutOurCompany,
+          existingAboutUs,
+        );
+      },
+    );
+  }
+
   async getAboutOurCompany(): Promise<AboutOurCompany[]> {
     return this.aboutOurCompanyRepo.find({ relations: ['image'] });
+  }
+
+  async deleteAboutOurCompany(id: string): Promise<SuccessMessageDto> {
+    try {
+      await this.aboutOurCompanyRepo.softDelete({ id });
+    } catch (error) {
+      console.log(`failed to delete about us: `, error);
+      throw new InternalServerErrorException(`Failed to delete`);
+    }
+
+    return { message: 'Deleted Successfully' };
   }
 
   async createOurPrinciple({
@@ -271,7 +348,7 @@ export class AboutUsPageService {
     let uploadedImage: ImageEntity;
     if (image) {
       try {
-        console.log('Image from category,', image);
+        console.log('Image from Why Choose us,', image);
         const imageUpload = (
           await this.cloudinaryService.uploadFiles(image)
         )[0];
@@ -280,7 +357,7 @@ export class AboutUsPageService {
           imageUrl: imageUpload.url,
         });
       } catch (error) {
-        console.log(`Error uploading category image: `, error);
+        console.log(`Error uploading Why Choose us image: `, error);
         throw new InternalServerErrorException();
       }
     }
@@ -303,6 +380,69 @@ export class AboutUsPageService {
         return transactionalEntityManager.save(WhyChooseUs, aboutUsDetails);
       },
     );
+  }
+
+  async updateWhyChooseUs(
+    id: string,
+    { heading, description, image, cards }: UpdateWhyChooseUsDto,
+  ): Promise<WhyChooseUs> {
+    const existingWhyChooseUs = await this.chooseUsRepo.findOne({
+      where: { id },
+    });
+
+    if (!existingWhyChooseUs) {
+      throw new NotFoundException(`No data found for given id: ${id}`);
+    }
+
+    let uploadedImage: ImageEntity;
+    if (image) {
+      try {
+        console.log('Image from whychooseUs,', image);
+        const imageUpload = (
+          await this.cloudinaryService.uploadFiles(image)
+        )[0];
+        uploadedImage = await this.imageRepo.save({
+          imageName: imageUpload.original_filename,
+          imageUrl: imageUpload.url,
+        });
+      } catch (error) {
+        console.log(`Error uploading Why Choose Us image: `, error);
+        throw new InternalServerErrorException();
+      }
+    }
+    return await this.chooseUsRepo.manager.transaction(
+      async (transactionalEntityManager) => {
+        if (heading) {
+          existingWhyChooseUs.heading = heading;
+        }
+        if (description) {
+          existingWhyChooseUs.description = description;
+        }
+
+        if (cards) {
+          existingWhyChooseUs.cards = cards;
+        }
+
+        if (image) {
+          existingWhyChooseUs.image = uploadedImage;
+        }
+
+        return transactionalEntityManager.save(
+          WhyChooseUs,
+          existingWhyChooseUs,
+        );
+      },
+    );
+  }
+
+  async deleteWhyChooseUs(id: string): Promise<SuccessMessageDto> {
+    try {
+      await this.chooseUsRepo.softDelete({ id });
+    } catch (error) {
+      console.log(`Delete failed for WhyChooseUs`, error);
+      throw new InternalServerErrorException(`Delete Failed`);
+    }
+    return { message: 'Deleted Successfully' };
   }
 
   async getWhyChooseUs(): Promise<WhyChooseUs[]> {

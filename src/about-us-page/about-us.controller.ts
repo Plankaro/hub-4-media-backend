@@ -13,7 +13,9 @@ import {
   CreateOurPrincipleDto,
   CreateTestimonialDto,
   CreateWhyChooseUsDto,
+  UpdateAboutOurCompanyDto,
   UpdateOurPrincipleDto,
+  UpdateWhyChooseUsDto,
 } from './dto';
 import { AboutOurCompany } from './entities/about-our-company.entity';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
@@ -36,6 +38,23 @@ export class AboutUsPageController {
     @Body() body: AboutOurCompanyDto,
   ): Promise<AboutOurCompany> {
     return this.aboutUsService.createAboutOurCompany(body);
+  }
+
+  @Put('our-company/:id')
+  @ApiCreatedResponse({ type: AboutOurCompany })
+  async updateAboutOurCompany(
+    @Param('id') id: string,
+    @Body() body: UpdateAboutOurCompanyDto,
+  ): Promise<AboutOurCompany> {
+    return this.aboutUsService.updateAboutOurCompany(id, body);
+  }
+
+  @Delete('our-company/:id')
+  @ApiOkResponse({ type: SuccessMessageDto })
+  async deleteAboutOurCompany(
+    @Param('id') id: string,
+  ): Promise<SuccessMessageDto> {
+    return this.aboutUsService.deleteAboutOurCompany(id);
   }
 
   @Get('our-company')
@@ -138,6 +157,21 @@ export class AboutUsPageController {
     @Body() body: CreateWhyChooseUsDto,
   ): Promise<WhyChooseUs> {
     return this.aboutUsService.createWhyChooseUs(body);
+  }
+
+  @Put('why-choose-us/:id')
+  @ApiCreatedResponse({ type: WhyChooseUs })
+  async updateWhyChooseUs(
+    @Param('id') id: string,
+    @Body() body: UpdateWhyChooseUsDto,
+  ) {
+    return this.aboutUsService.updateWhyChooseUs(id, body);
+  }
+
+  @Delete('why-choose-us/:id')
+  @ApiCreatedResponse({ type: WhyChooseUs })
+  async deleteWhyChooseUs(@Param('id') id: string) {
+    return this.aboutUsService.deleteWhyChooseUs(id);
   }
 
   @Get('why-choose-us')
