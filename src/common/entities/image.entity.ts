@@ -10,7 +10,11 @@ import {
   Testimonials,
   WhyChooseUs,
 } from 'src/home-page/entities';
-import { ExtraService, Service, ServiceCategory } from 'src/service-page/entities';
+import {
+  ExtraService,
+  Service,
+  ServiceCategory,
+} from 'src/service-page/entities';
 import {
   Column,
   CreateDateColumn,
@@ -104,7 +108,7 @@ export class ImageEntity {
   service: Service;
 
   @ManyToOne(() => ExtraService, (extraService) => extraService.images, {
-    nullable: true
+    nullable: true,
   })
-  extraService: ExtraService
+  extraService: ExtraService;
 }

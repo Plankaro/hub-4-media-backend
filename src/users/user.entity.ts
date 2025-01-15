@@ -106,7 +106,6 @@ export class User {
   @OneToMany(() => Service, (service) => service.provider)
   services: Service[];
 
-
   @OneToMany(() => Review, (review) => review.user)
-  reviews: Review[]
+  reviews: Review[];
 }

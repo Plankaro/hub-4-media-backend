@@ -64,7 +64,7 @@ const commonTypeOrmConfig: DataSourceOptions = {
     BlogCategory,
     BlogPost,
     Review,
-    ServicePricing
+    ServicePricing,
   ],
   synchronize: false,
   ssl: false,

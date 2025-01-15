@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { ImageUploadDto } from 'src/common/dtos';
 
 export class AboutOurCompanyDto {
@@ -24,8 +29,8 @@ export class AboutOurCompanyDto {
   @IsNotEmpty()
   sideText: string;
 
-  @ApiProperty({ type: ImageUploadDto })
-  @IsNotEmpty()
+  @ApiProperty({ type: ImageUploadDto, required: false })
+  @IsOptional()
   @ValidateNested()
   @Type(() => ImageUploadDto)
   image: ImageUploadDto;

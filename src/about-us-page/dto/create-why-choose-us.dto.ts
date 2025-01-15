@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { ImageUploadDto } from 'src/common/dtos';
 
 export class WhyChooseUsCardsDto {
@@ -26,14 +32,14 @@ export class CreateWhyChooseUsDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({ type: ImageUploadDto })
-  @IsNotEmpty()
+  @ApiProperty({ type: ImageUploadDto, required: false })
+  @IsOptional()
   @ValidateNested()
   @Type(() => ImageUploadDto)
   image: ImageUploadDto;
 
-  @ApiProperty({ type: [WhyChooseUsCardsDto] })
-  @IsNotEmpty()
+  @ApiProperty({ type: [WhyChooseUsCardsDto], required: false })
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => WhyChooseUsCardsDto)

@@ -31,7 +31,9 @@ export class Service {
   serviceTitle: string;
 
   @ApiProperty()
-  @OneToMany(() => ServicePricing, (pricing) => pricing.service, { cascade: true })
+  @OneToMany(() => ServicePricing, (pricing) => pricing.service, {
+    cascade: true,
+  })
   @JoinColumn()
   pricings: ServicePricing[];
 
@@ -68,7 +70,7 @@ export class Service {
   pincode?: number;
 
   @ApiProperty()
-  @Column("text", { array: true })
+  @Column('text', { array: true })
   includeServices: string[];
 
   // @ApiProperty()
@@ -123,7 +125,6 @@ export class Service {
   })
   @JoinColumn()
   extraServices: ExtraService[];
-
 
   @ApiProperty({ type: () => [TimeSlotsOfDay] })
   @OneToMany(() => TimeSlotsOfDay, (timeSlot) => timeSlot.service, {

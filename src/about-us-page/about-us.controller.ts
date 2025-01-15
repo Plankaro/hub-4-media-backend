@@ -118,6 +118,14 @@ export class AboutUsPageController {
     return this.aboutUsService.getTestimonialById(id);
   }
 
+  @Delete('testimonials/:id')
+  @ApiOkResponse({ type: SuccessMessageDto })
+  async deleteTestimonialById(
+    @Param('id') id: string,
+  ): Promise<SuccessMessageDto> {
+    return this.aboutUsService.deleteTestimonial(id);
+  }
+
   /**
    * * Why Choose Us
    */

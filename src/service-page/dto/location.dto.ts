@@ -10,29 +10,47 @@ import {
 } from 'class-validator';
 
 export class ServiceLocationDto {
-
-
-  @ApiProperty({ description: 'Address where the service is provided.', required: false, example: '123 Main St, Springfield' })
+  @ApiProperty({
+    description: 'Address where the service is provided.',
+    required: false,
+    example: '123 Main St, Springfield',
+  })
   @IsString()
   @IsOptional()
   address?: string;
 
-  @ApiProperty({ description: 'Country where the service is provided.', required: false, example: 'USA' })
+  @ApiProperty({
+    description: 'Country where the service is provided.',
+    required: false,
+    example: 'USA',
+  })
   @IsString()
   @IsOptional()
   country?: string;
 
-  @ApiProperty({ description: 'City where the service is provided.', required: false, example: 'Springfield' })
+  @ApiProperty({
+    description: 'City where the service is provided.',
+    required: false,
+    example: 'Springfield',
+  })
   @IsString()
   @IsOptional()
   city?: string;
 
-  @ApiProperty({ description: 'State where the service is provided.', required: false, example: 'Illinois' })
+  @ApiProperty({
+    description: 'State where the service is provided.',
+    required: false,
+    example: 'Illinois',
+  })
   @IsString()
   @IsOptional()
   state?: string;
 
-  @ApiProperty({ description: 'Pincode/ZIP code for the service location.', required: false, example: 62701 })
+  @ApiProperty({
+    description: 'Pincode/ZIP code for the service location.',
+    required: false,
+    example: 62701,
+  })
   @IsNumber()
   @IsOptional()
   pincode?: number;

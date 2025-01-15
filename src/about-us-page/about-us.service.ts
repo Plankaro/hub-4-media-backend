@@ -42,16 +42,21 @@ export class AboutUsPageService {
     image,
   }: AboutOurCompanyDto): Promise<AboutOurCompany> {
     let uploadedImage: ImageEntity;
-    try {
-      console.log('Image from category,', image);
-      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
-      uploadedImage = await this.imageRepo.save({
-        imageName: imageUpload.original_filename,
-        imageUrl: imageUpload.url,
-      });
-    } catch (error) {
-      console.log(`Error uploading category image: `, error);
-      throw new InternalServerErrorException();
+
+    if (image) {
+      try {
+        console.log('Image from category,', image);
+        const imageUpload = (
+          await this.cloudinaryService.uploadFiles(image)
+        )[0];
+        uploadedImage = await this.imageRepo.save({
+          imageName: imageUpload.original_filename,
+          imageUrl: imageUpload.url,
+        });
+      } catch (error) {
+        console.log(`Error uploading category image: `, error);
+        throw new InternalServerErrorException();
+      }
     }
     return await this.aboutOurCompanyRepo.manager.transaction(
       async (transactionalEntityManager) => {
@@ -64,8 +69,11 @@ export class AboutUsPageService {
           descriptionOne,
           descriptionTwo,
           sideText,
-          image: uploadedImage,
         });
+
+        if (image) {
+          aboutUsDetails.image = uploadedImage;
+        }
 
         return transactionalEntityManager.save(AboutOurCompany, aboutUsDetails);
       },
@@ -220,7 +228,12 @@ export class AboutUsPageService {
   }
 
   async deleteTestimonial(id: string): Promise<SuccessMessageDto> {
-    await this.testiMonialsRepo.softDelete({ id });
+    try {
+      await this.testiMonialsRepo.softDelete({ id });
+    } catch (error) {
+      console.log(`Error deleting testimonials`, error);
+      throw new InternalServerErrorException(`Error deleting testimonials`);
+    }
 
     return { message: 'Principle Deleted Successfully' };
   }
@@ -240,16 +253,20 @@ export class AboutUsPageService {
     cards,
   }: CreateWhyChooseUsDto): Promise<WhyChooseUs> {
     let uploadedImage: ImageEntity;
-    try {
-      console.log('Image from category,', image);
-      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
-      uploadedImage = await this.imageRepo.save({
-        imageName: imageUpload.original_filename,
-        imageUrl: imageUpload.url,
-      });
-    } catch (error) {
-      console.log(`Error uploading category image: `, error);
-      throw new InternalServerErrorException();
+    if (image) {
+      try {
+        console.log('Image from category,', image);
+        const imageUpload = (
+          await this.cloudinaryService.uploadFiles(image)
+        )[0];
+        uploadedImage = await this.imageRepo.save({
+          imageName: imageUpload.original_filename,
+          imageUrl: imageUpload.url,
+        });
+      } catch (error) {
+        console.log(`Error uploading category image: `, error);
+        throw new InternalServerErrorException();
+      }
     }
     return await this.chooseUsRepo.manager.transaction(
       async (transactionalEntityManager) => {
@@ -261,8 +278,11 @@ export class AboutUsPageService {
           heading,
           description,
           cards,
-          image: uploadedImage,
         });
+
+        if (image) {
+          aboutUsDetails.image = uploadedImage;
+        }
 
         return transactionalEntityManager.save(WhyChooseUs, aboutUsDetails);
       },

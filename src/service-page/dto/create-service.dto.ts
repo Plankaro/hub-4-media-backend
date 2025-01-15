@@ -88,34 +88,44 @@ export class CreateServiceDtos {
   seo: ServiceSeoDto;
 }
 
-
-
 /**
  * DTO for creating a new service.
  */
 export class CreateServiceDto {
-
-  @ApiProperty({ description: 'Title of the service.', example: 'Haircut and Styling' })
+  @ApiProperty({
+    description: 'Title of the service.',
+    example: 'Haircut and Styling',
+  })
   @IsString()
   @MaxLength(255)
   serviceTitle: string;
 
-  @ApiProperty({ description: 'Pricing details for the service.', type: [CreateServicePricingDto] })
+  @ApiProperty({
+    description: 'Pricing details for the service.',
+    type: [CreateServicePricingDto],
+  })
   @IsArray()
   @IsOptional()
   pricings?: CreateServicePricingDto[];
 
-
-  @ApiProperty({ description: 'Description of the service.', example: 'A professional haircut and styling service for men and women.' })
+  @ApiProperty({
+    description: 'Description of the service.',
+    example: 'A professional haircut and styling service for men and women.',
+  })
   @IsString()
   description: string;
 
-
-  @ApiProperty({ description: 'List of services included in the service package.', type: [String] })
+  @ApiProperty({
+    description: 'List of services included in the service package.',
+    type: [String],
+  })
   @IsArray()
   includeServices: string[];
 
-  @ApiProperty({ description: 'URL for the service-related video (if available).', example: 'https://www.youtube.com/watch?v=xyz' })
+  @ApiProperty({
+    description: 'URL for the service-related video (if available).',
+    example: 'https://www.youtube.com/watch?v=xyz',
+  })
   @IsString()
   videoUrl: string;
 
@@ -152,12 +162,20 @@ export class CreateServiceDto {
   @Type(() => ServiceSeoDto)
   seo: ServiceSeoDto;
 
-  @ApiProperty({ description: 'Degree required for the service provider (if applicable).', required: false, example: 'Certified Barber' })
+  @ApiProperty({
+    description: 'Degree required for the service provider (if applicable).',
+    required: false,
+    example: 'Certified Barber',
+  })
   @IsString()
   @IsOptional()
   degree?: string;
 
-  @ApiProperty({ description: 'Institution where the degree was obtained (if applicable).', required: false, example: 'Barber College' })
+  @ApiProperty({
+    description: 'Institution where the degree was obtained (if applicable).',
+    required: false,
+    example: 'Barber College',
+  })
   @IsString()
   @IsOptional()
   institution?: string;
@@ -176,5 +194,4 @@ export class CreateServiceDto {
   @IsNotEmpty()
   @IsUUID()
   subCategoryId: string;
-
 }
