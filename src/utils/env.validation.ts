@@ -109,7 +109,11 @@ export class EnvironmentVariable {
   // Auth Api Url
   @IsString()
   @IsNotEmpty()
-  AUTH_UI_URL: string;
+  AUTH_PROD_UI_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  AUTH_DEV_UI_URL: string;
 
   // COOKIES_DOMAIN
   @IsNotEmpty()

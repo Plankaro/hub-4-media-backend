@@ -44,7 +44,12 @@ export class AuthService {
     private emailService: EmailService,
     private configService: ConfigService<EnvironmentVariable, true>,
     private tokenService: TokenService,
-  ) {}
+
+  ) { }
+
+  private readonly UI_URL = this.configService.get("NODE_ENV") === "production"
+    ? this.configService.get("AUTH_PROD_UI_URL")
+    : this.configService.get("AUTH_DEV_UI_URL")
 
   async signIn({ email, password }: SignInUserDto, res: Response) {
     const user = await this.usersService.findVerifiedAccountByEmail(email);
@@ -72,9 +77,7 @@ export class AuthService {
       const { validationToken } =
         await this.tokenService.generateValidationToken(existingUser);
 
-      const redirectUrl = `${this.configService.get(
-        'AUTH_UI_URL',
-      )}/sign-in-with-token?token=${validationToken}`;
+      const redirectUrl = `${this.UI_URL}/sign-in-with-token?token=${validationToken}`;
       return { redirectUrl };
     }
 
@@ -100,9 +103,7 @@ export class AuthService {
     const { validationToken } =
       await this.tokenService.generateValidationToken(user);
 
-    const redirectUrl = `${this.configService.get(
-      'AUTH_UI_URL',
-    )}/sign-in-with-token?token=${validationToken}`;
+    const redirectUrl = `${this.UI_URL}/sign-in-with-token?token=${validationToken}`;
 
     return { redirectUrl };
   }
@@ -152,9 +153,7 @@ export class AuthService {
     const { validationToken } =
       await this.tokenService.generateValidationToken(user);
 
-    const resetPasswordLink = `${this.configService.get(
-      'AUTH_UI_URL',
-    )}/verify?token=${validationToken}`;
+    const resetPasswordLink = `${this.UI_URL}/verify?token=${validationToken}`;
 
     await this.emailService.sendVerificationEmail(email, resetPasswordLink);
 
@@ -196,9 +195,7 @@ export class AuthService {
     const { validationToken } =
       await this.tokenService.generateValidationToken(existingUser);
 
-    const resetPasswordLink = `${this.configService.get(
-      'AUTH_UI_URL',
-    )}/verify?token=${validationToken}`;
+    const resetPasswordLink = `${this.UI_URL}/verify?token=${validationToken}`;
 
     await this.emailService.sendVerificationEmail(email, resetPasswordLink);
 
@@ -304,9 +301,7 @@ export class AuthService {
       await this.tokenService.generateValidationToken(user);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const signInWithTokenLink = `${this.configService.get(
-      'AUTH_UI_URL',
-    )}/sign-in-with-token?token=${validationToken}`;
+    const signInWithTokenLink = `${this.UI_URL}/sign-in-with-token?token=${validationToken}`;
 
     // await this.mailService.sendMail({
     //   to: email,
@@ -452,9 +447,7 @@ export class AuthService {
     const { validationToken } =
       await this.tokenService.generateValidationToken(user);
 
-    const resetPasswordLink = `${this.configService.get(
-      'AUTH_UI_URL',
-    )}/reset-password?token=${validationToken}`;
+    const resetPasswordLink = `${this.UI_URL}/reset-password?token=${validationToken}`;
 
     await this.emailService.sendResetPasswordLink(email, resetPasswordLink);
 
