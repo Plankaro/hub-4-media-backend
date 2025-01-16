@@ -1,4 +1,4 @@
-export { CreateCategoryDto } from './create-category.dto';
+export { CreateServiceCategoryDto } from './create-category.dto';
 export { UpdateCategoryDto } from './update-category.dto';
 export { ExtraServiceDto } from './extra-service.dto';
 export { ServiceLocationDto } from './location.dto';

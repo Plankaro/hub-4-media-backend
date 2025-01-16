@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ServicePageService } from '../services';
-import { CreateCategoryDto, CreateServiceDto } from '../dto';
+import { CreateServiceCategoryDto, CreateServiceDto } from '../dto';
 import { Service } from '../entities';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { SuccessMessageDto } from 'src/common/dtos';
@@ -17,11 +17,11 @@ import { ServiceFilterDto } from '../dto/service-filter.dto';
 
 @Controller('services')
 export class ServicePageController {
-  constructor(private service: ServicePageService) {}
+  constructor(private service: ServicePageService) { }
 
   @Post('/')
   @ApiCreatedResponse({ type: Service })
-  @ApiBody({ type: CreateCategoryDto })
+  @ApiBody({ type: CreateServiceCategoryDto })
   createService(@Body() body: CreateServiceDto): Promise<Service> {
     return this.service.create(body);
   }

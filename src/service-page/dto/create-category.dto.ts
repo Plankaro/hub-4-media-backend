@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { ImageUploadDto } from 'src/common/dtos';
 
-export class CreateCategoryDto {
+export class CreateServiceCategoryDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()

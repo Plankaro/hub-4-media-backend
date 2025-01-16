@@ -8,18 +8,18 @@ import {
   Put,
 } from '@nestjs/common';
 import { ServiceCategoryService } from '../services';
-import { CreateCategoryDto, UpdateCategoryDto } from '../dto';
+import { CreateServiceCategoryDto, UpdateCategoryDto } from '../dto';
 import { ServiceCategory } from '../entities';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { SuccessMessageDto } from 'src/common/dtos';
 
 @Controller('services-categories')
 export class ServiceCategoryController {
-  constructor(private categoryService: ServiceCategoryService) {}
+  constructor(private categoryService: ServiceCategoryService) { }
 
   @Post('/')
   @ApiCreatedResponse({ type: ServiceCategory })
-  createCategory(@Body() body: CreateCategoryDto): Promise<ServiceCategory> {
+  createCategory(@Body() body: CreateServiceCategoryDto): Promise<ServiceCategory> {
     return this.categoryService.create(body);
   }
 

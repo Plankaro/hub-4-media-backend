@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateCategoryDto, UpdateCategoryDto } from '../dto';
+import { CreateServiceCategoryDto, UpdateCategoryDto } from '../dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ImageEntity } from 'src/common/entities';
@@ -18,14 +18,14 @@ export class ServiceCategoryService {
     @InjectRepository(ImageEntity) private imageRepo: Repository<ImageEntity>,
     @InjectRepository(ServiceCategory)
     private categoryRepo: Repository<ServiceCategory>,
-  ) {}
+  ) { }
 
   async create({
     title,
     description,
     image,
     isFeatured,
-  }: CreateCategoryDto): Promise<ServiceCategory> {
+  }: CreateServiceCategoryDto): Promise<ServiceCategory> {
     let uploadedImage: ImageEntity;
     try {
       console.log('Image from category,', image);
