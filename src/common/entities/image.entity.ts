@@ -17,6 +17,7 @@ import {
   Service,
   ServiceCategory,
 } from 'src/service-page/entities';
+import { User } from 'src/users/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -118,4 +119,9 @@ export class ImageEntity {
     nullable: true,
   })
   extraService: ExtraService;
+  
+  @OneToOne(() => User, (user) => user.image, {
+    nullable: true,
+  })
+  user: User;
 }

@@ -1,5 +1,7 @@
-import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ImageUploadDto } from 'src/common/dtos';
 
 export class EditProfileDto {
   @ApiProperty()
@@ -27,6 +29,13 @@ export class EditProfileDto {
   timezone: string;
 
   @ApiProperty()
-  @IsString()
+  @IsOptional()
   languages: string[];
+
+  @ApiProperty()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ImageUploadDto)
+  image: ImageUploadDto;
+
 }

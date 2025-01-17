@@ -7,10 +7,11 @@ import { AuthModule } from '../auth/auth.module';
 import { AbilityModule } from '../ability/ability.module';
 import { EmailModule } from 'src/email/email.module';
 import { ServicePageModule } from 'src/service-page/service.module';
+import { ImageEntity } from 'src/common/entities';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, ImageEntity]),
     forwardRef(() => AuthModule),
     AbilityModule,
     EmailModule,

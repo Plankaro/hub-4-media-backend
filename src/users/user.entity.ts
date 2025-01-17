@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { AuthProvider } from './types/account-type';
 import { Exclude } from 'class-transformer';
@@ -14,12 +15,18 @@ import { UserOtp } from '../auth/user-otp.entity';
 import { UserRole } from './types/user-role';
 import { Service } from 'src/service-page/entities';
 import { Review } from 'src/service-page/entities/review.entity';
+import { ImageEntity } from 'src/common/entities';
 
 @Entity()
 export class User {
   @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ApiProperty({ type: () => ImageEntity })
+  @OneToOne(() => ImageEntity, (image) => image.service)
+  @JoinColumn()
+  image: ImageEntity;
 
   @ApiProperty()
   @Column({ unique: true })
@@ -32,11 +39,12 @@ export class User {
   @ApiProperty()
   @Column({ default: false })
   isEmailVerified: boolean;
-
+  
   @Column()
   @Exclude({ toPlainOnly: true })
   password: string;
-
+  
+  @ApiProperty()
   @Column({ nullable: true })
   bio: string;
 
@@ -61,7 +69,8 @@ export class User {
   lastName: string;
 
   @ApiProperty()
-  @Column({ nullable: true, type: 'simple-array', array: true })
+  // @Column({ nullable: true, type: 'simple-array', array: true })
+  @Column('text', { array: true, default: '{}' })
   languages: string[];
 
   @ApiProperty()

@@ -68,7 +68,7 @@ const commonTypeOrmConfig: DataSourceOptions = {
     ServicePricing,
     VerifiedAgencies,
   ],
-  synchronize: false,
+  synchronize: true,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {

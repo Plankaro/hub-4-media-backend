@@ -47,7 +47,7 @@ export class UsersController {
 
   @ApiOkResponse({ type: ProfileDto })
   @Put('/profile/edit')
-  // @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard())
   editProfile(@CurrentUser() user: User, @Body() body: EditProfileDto) {
     return this.usersService.editProfile(user, body);
   }

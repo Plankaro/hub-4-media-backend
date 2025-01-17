@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
@@ -14,10 +15,14 @@ import { getPaginationMeta } from '../common/utility';
 import { PaginationDto } from '../common/dtos';
 import { instanceToPlain } from 'class-transformer';
 import { Response } from 'express';
+import { ImageEntity } from 'src/common/entities';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
   constructor(
+    private cloudinaryService: CloudinaryService,
+    @InjectRepository(ImageEntity) private imageRepo: Repository<ImageEntity>,
     @InjectRepository(User) private repo: Repository<User>,
     private configService: ConfigService,
   ) {}
@@ -111,12 +116,70 @@ export class UsersService {
     return updatedUser;
   }
 
-  async editProfile(user: User, { firstName, lastName }: EditProfileDto) {
-    user.firstName = firstName;
-    user.lastName = lastName;
+  async editProfile(
+    user: User,
+    {
+      firstName,
+      lastName,
+      image,
+      bio,
+      country,
+      languages,
+      region,
+      timezone,
+    }: EditProfileDto,
+  ) {
+    console.log("🚀 ~ UsersService ~ user:", user)
+    console.log({      firstName,
+      lastName,
+      image,
+      bio,
+      country,
+      languages,
+      region,
+      timezone,
+    });
 
-    const updatedUser = await this.repo.save(user);
-    return { user: updatedUser };
+    
+    try {
+      // Update basic user properties if provided
+      if (firstName) user.firstName = firstName;
+      if (lastName) user.lastName = lastName;
+      if (bio) user.bio = bio;
+      if (country) user.country = country;
+      if (languages) user.languages = languages;
+      if (region) user.region = region;
+      if (timezone) user.timezone = timezone;
+
+      // Handle image upload if a new image is provided
+      if (image) {
+        try {
+          console.log('Uploading image:', image);
+          const imageUpload = (
+            await this.cloudinaryService.uploadFiles(image)
+          )[0];
+          const uploadedImage = await this.imageRepo.save({
+            imageName: imageUpload.original_filename,
+            imageUrl: imageUpload.url,
+          });
+
+          // Associate uploaded image with user
+          user.image = uploadedImage;
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          throw new InternalServerErrorException('Failed to upload image');
+        }
+      }
+
+      // Save updated user profile in the repository
+      const updatedUser = await this.repo.save(user);
+
+      // Return the updated user profile
+      return { user: updatedUser };
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw new InternalServerErrorException('Failed to update profile');
+    }
   }
 
   async getAllUsers({ pageIndex = 0, pageSize = 10 }: PaginationDto) {
