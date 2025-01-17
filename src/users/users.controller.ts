@@ -7,6 +7,7 @@ import {
   Query,
   Param,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 // import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -25,6 +26,7 @@ import { UsersService } from './users.service';
 // import { Action } from '../ability/ability.factory';
 import { PaginationDto } from '../common/dtos';
 import { Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UsersController {
@@ -32,7 +34,7 @@ export class UsersController {
 
   @ApiOkResponse({ type: ProfileDto })
   @Get('/')
-  // @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard())
   getUser(@CurrentUser() user: User, @Res() res: Response): Promise<void> {
     return this.usersService.getSafeUserById(user.id, res);
   }
