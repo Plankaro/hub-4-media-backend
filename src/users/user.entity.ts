@@ -37,6 +37,9 @@ export class User {
   @Exclude({ toPlainOnly: true })
   password: string;
 
+  @Column({ nullable: true })
+  bio: string;
+
   @ApiProperty()
   @Column({ default: false })
   hasSetPassword: boolean;
@@ -56,6 +59,10 @@ export class User {
   @ApiProperty()
   @Column({ default: '' })
   lastName: string;
+
+  @ApiProperty()
+  @Column({ nullable: true, type: 'simple-array', array: true })
+  languages: string[];
 
   @ApiProperty()
   @Column({ default: 'NA', nullable: true })

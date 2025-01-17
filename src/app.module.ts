@@ -50,4 +50,5 @@ import { BlogModule } from './blog/blog.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+// eslint-disable-next-line prettier/prettier
+export class AppModule { }
