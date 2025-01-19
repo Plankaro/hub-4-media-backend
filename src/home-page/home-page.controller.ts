@@ -28,7 +28,7 @@ import {
 } from './entities';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { SectionHeadingDto } from './dto/section-headings.dto';
-import { PricePlanDto } from './dto/price-plan.dto';
+import { CreatePlanDto } from './dto/price-plan.dto';
 
 import { SectionName } from './types/section-name.enum';
 import { VerifiedAgencies } from './entities/verified-agencies.entity';
@@ -126,7 +126,7 @@ export class HomePageController {
 
   @ApiOkResponse({ type: Plans })
   @Post('/price-plan')
-  async addPricePlan(@Body() body: PricePlanDto): Promise<Plans> {
+  async addPricePlan(@Body() body: CreatePlanDto): Promise<Plans> {
     return this.homePageService.addPricePlan(body);
   }
 
@@ -134,7 +134,7 @@ export class HomePageController {
   @Put('/price-plan/:id') // New route for updating a pricing plan by ID
   async updatePricePlan(
     @Param('id') id: string, // Extract the pricing plan ID from the route parameter
-    @Body() body: PricePlanDto, // Updated data in the body
+    @Body() body: CreatePlanDto, // Updated data in the body
   ): Promise<Plans> {
     return this.homePageService.updatePricePlan(id, body);
   }

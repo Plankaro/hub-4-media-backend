@@ -32,6 +32,13 @@ import { BlogCategory, BlogPost } from 'src/blog/entities';
 import { Review } from 'src/service-page/entities/review.entity';
 import { ServicePricing } from 'src/service-page/entities/pricing.entity';
 import { VerifiedAgencies } from 'src/home-page/entities/verified-agencies.entity';
+import {
+  Agency,
+  Contact,
+  LocationEntity,
+  Social,
+  Timeslot,
+} from 'src/agency/entities';
 
 config();
 
@@ -67,6 +74,11 @@ const commonTypeOrmConfig: DataSourceOptions = {
     Review,
     ServicePricing,
     VerifiedAgencies,
+    Agency,
+    Contact,
+    Social,
+    LocationEntity,
+    Timeslot,
   ],
   synchronize: true,
   ssl: false,

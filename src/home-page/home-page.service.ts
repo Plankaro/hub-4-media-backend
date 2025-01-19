@@ -23,7 +23,7 @@ import {
   SectionHeadingDto,
   UpdateAgencyDto,
 } from './dto';
-import { PricePlanDto } from './dto/price-plan.dto';
+import { CreatePlanDto } from './dto/price-plan.dto';
 import { SuccessMessageDto } from 'src/auth/dtos';
 import { SectionName } from './types/section-name.enum';
 import { ImageEntity } from 'src/common/entities';
@@ -335,23 +335,19 @@ export class HomePageService {
   }
 
   async addPricePlan({
-    plan,
-    heading,
-    line,
-    free,
-    slogan,
-    amount,
-    services,
-  }: PricePlanDto): Promise<Plans> {
+    name,
+    price,
+    description,
+    features,
+    isPopular,
+  }: CreatePlanDto): Promise<Plans> {
     try {
       const newPlan = this.plansRepo.create({
-        plan,
-        heading,
-        line,
-        free,
-        slogan,
-        amount,
-        services,
+        name,
+        price,
+        description,
+        features,
+        isPopular,
       });
 
       return this.plansRepo.save(newPlan);
@@ -363,7 +359,7 @@ export class HomePageService {
 
   async updatePricePlan(
     id: string,
-    { plan, heading, line, free, slogan, amount, services }: PricePlanDto,
+    { name, price, description, features, isPopular }: CreatePlanDto,
   ): Promise<Plans> {
     try {
       const existingPlan = await this.plansRepo.findOne({ where: { id } });
@@ -373,13 +369,11 @@ export class HomePageService {
       }
 
       Object.assign(existingPlan, {
-        plan,
-        heading,
-        line,
-        free,
-        slogan,
-        amount,
-        services,
+        name,
+        price,
+        description,
+        features,
+        isPopular,
       });
 
       return this.plansRepo.save(existingPlan);

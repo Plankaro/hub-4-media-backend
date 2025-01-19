@@ -15,6 +15,7 @@ import { ContactUsPageModule } from './contact-us-page/contact-us.module';
 import { ServicePageModule } from './service-page/service.module';
 import { AboutUsPageModule } from './about-us-page/about-us.module';
 import { BlogModule } from './blog/blog.module';
+import { AgencyModule } from './agency/agency.module';
 
 @Module({
   imports: [
@@ -46,9 +47,9 @@ import { BlogModule } from './blog/blog.module';
     AboutUsPageModule,
     ServicePageModule,
     BlogModule,
+    AgencyModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-// eslint-disable-next-line prettier/prettier
-export class AppModule { }
+export class AppModule {}
