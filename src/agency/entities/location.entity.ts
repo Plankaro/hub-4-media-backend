@@ -27,6 +27,10 @@ export class Location {
   @Column({ type: 'varchar', length: 255 })
   addressLine2: string;
 
+  @ApiProperty({ description: 'Agency Landmark gogle map embeded url' })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  landmark: string;
+
   @ApiProperty({ description: 'Agency Postal Code' })
   @Column({ type: 'varchar', length: 255, nullable: true })
   postalCode: string;

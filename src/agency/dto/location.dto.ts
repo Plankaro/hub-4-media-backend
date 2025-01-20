@@ -30,6 +30,11 @@ export class LocationDto {
   @IsString()
   addressLine2?: string;
 
+  @ApiProperty({ description: 'Agency Address Line 1' })
+  @IsString()
+  @IsNotEmpty()
+  landmark: string;
+
   @ApiProperty({ description: 'Agency Postal Code', required: false })
   @IsOptional()
   @IsString()

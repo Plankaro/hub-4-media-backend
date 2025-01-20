@@ -13,6 +13,7 @@ import { SocialDto } from './social.dto';
 import { LocationDto } from './location.dto';
 import { TimeslotDto } from './timeslot.dto';
 import { Type } from 'class-transformer';
+import { CreateAgencyServiceDto } from './agency-service.dto';
 
 export class CreateAgencyDto {
   @ApiProperty({ description: 'Name of the agency' })
@@ -45,6 +46,11 @@ export class CreateAgencyDto {
   @Type(() => LocationDto)
   location: LocationDto;
 
+  @ApiProperty({ description: 'Agency services' })
+  @ValidateNested()
+  @Type(() => CreateAgencyServiceDto)
+  agencyService: CreateAgencyServiceDto[];
+
   @ApiProperty({ description: 'Agency description or tagline' })
   @IsString()
   description: string;
@@ -64,6 +70,10 @@ export class CreateAgencyDto {
   @IsOptional()
   @IsString()
   status: string = 'ACTIVE';
+
+  @ApiProperty({ description: 'Available services of the agency' })
+  @IsArray()
+  availableServices: string[];
 
   @ApiProperty({ description: 'Verified status of the agency', default: false })
   @IsOptional()

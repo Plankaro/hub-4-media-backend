@@ -8,6 +8,7 @@ import { Contact } from './entities/contact.entity';
 import { Social } from './entities/social.entity';
 import { Location } from './entities/location.entity';
 import { Timeslot } from './entities/timeslot.entity';
+import { AgencyServiceEntity } from './entities/service.entity';
 
 @Injectable()
 export class AgencyService {
@@ -22,6 +23,8 @@ export class AgencyService {
     private locationRepository: Repository<Location>,
     @InjectRepository(Timeslot)
     private timeslotRepository: Repository<Timeslot>,
+    @InjectRepository(AgencyServiceEntity)
+    private agencyServiceRepository: Repository<AgencyServiceEntity>,
   ) {}
 
   // Create Agency
@@ -40,12 +43,16 @@ export class AgencyService {
     const timeslots = await this.timeslotRepository.save(
       createAgencyDto.timeSlots,
     );
+    const agencyServices = await this.agencyServiceRepository.save(
+      createAgencyDto.agencyService,
+    );
 
     // Attach relations to the agency
     agency.contact = contact;
     agency.social = social;
     agency.location = location;
     agency.timeSlots = timeslots;
+    agency.services = agencyServices;
 
     // Save the agency with its related entities
     return await this.agencyRepository.save(agency);
@@ -54,7 +61,7 @@ export class AgencyService {
   // Get all agencies
   async findAll(): Promise<Agency[]> {
     return this.agencyRepository.find({
-      relations: ['contact', 'social', 'location', 'timeSlots'],
+      relations: ['contact', 'social', 'location', 'timeSlots', 'services'],
     });
   }
 
@@ -62,7 +69,7 @@ export class AgencyService {
   async findOne(id: string): Promise<Agency> {
     return this.agencyRepository.findOne({
       where: { id },
-      relations: ['contact', 'social', 'location', 'timeSlots'],
+      relations: ['contact', 'social', 'location', 'timeSlots', 'services'],
     });
   }
 

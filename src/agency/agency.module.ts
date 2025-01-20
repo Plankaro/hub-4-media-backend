@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AgencyService } from './agency.service';
 import { AgencyController } from './agency.controller';
 import { Agency, Contact, LocationEntity, Social, Timeslot } from './entities';
+import { AgencyServiceEntity } from './entities/service.entity';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { Agency, Contact, LocationEntity, Social, Timeslot } from './entities';
       Social,
       LocationEntity,
       Timeslot,
+      AgencyServiceEntity,
     ]),
   ],
   providers: [AgencyService],

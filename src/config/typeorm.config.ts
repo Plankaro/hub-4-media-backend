@@ -39,6 +39,7 @@ import {
   Social,
   Timeslot,
 } from 'src/agency/entities';
+import { AgencyServiceEntity } from 'src/agency/entities/service.entity';
 
 config();
 
@@ -79,8 +80,9 @@ const commonTypeOrmConfig: DataSourceOptions = {
     Social,
     LocationEntity,
     Timeslot,
+    AgencyServiceEntity,
   ],
-  synchronize: true,
+  synchronize: false,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {

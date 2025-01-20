@@ -13,6 +13,7 @@ import { Contact } from './contact.entity';
 import { Social } from './social.entity';
 import { Location } from './location.entity';
 import { Timeslot } from './timeslot.entity';
+import { AgencyServiceEntity } from './service.entity';
 
 @Entity('agencies')
 export class Agency {
@@ -47,6 +48,16 @@ export class Agency {
   @OneToOne(() => Location, { cascade: true })
   @JoinColumn()
   location: Location;
+
+  @OneToMany(
+    () => AgencyServiceEntity,
+    (agencyServiceEntity) => agencyServiceEntity.agency,
+  )
+  services: AgencyServiceEntity[];
+
+  @ApiProperty({ description: 'Available services of the agency' })
+  @Column({ type: 'simple-array' })
+  availableServices: string[];
 
   @ApiProperty({ description: 'Agency description or tagline' })
   @Column({ type: 'text' })
