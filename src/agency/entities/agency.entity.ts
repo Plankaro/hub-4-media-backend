@@ -70,6 +70,10 @@ export class Agency {
   @ApiProperty({ description: 'Agency status (active or inactive)' })
   @Column({ type: 'varchar', length: 50, default: 'ACTIVE' })
   status: string;
+  
+  @ApiProperty({ description: 'youtube video url' })
+  @Column({ type: 'varchar', length: 255, default: 'ACTIVE' })
+  videoUrl: string;
 
   @ApiProperty({ description: 'Verified status of the agency' })
   @Column({ type: 'boolean', default: false })

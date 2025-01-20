@@ -75,6 +75,11 @@ export class CreateAgencyDto {
   @IsArray()
   availableServices: string[];
 
+  @ApiProperty({ description: 'youtube video url' })
+  @IsOptional()
+  @IsString()
+  videoUrl: string;
+
   @ApiProperty({ description: 'Verified status of the agency', default: false })
   @IsOptional()
   @IsBoolean()

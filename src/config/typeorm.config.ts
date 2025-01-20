@@ -82,7 +82,7 @@ const commonTypeOrmConfig: DataSourceOptions = {
     Timeslot,
     AgencyServiceEntity,
   ],
-  synchronize: false,
+  synchronize: true,
   ssl: false,
   namingStrategy: new SnakeNamingStrategy(),
   extra: {
