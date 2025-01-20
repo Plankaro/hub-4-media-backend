@@ -34,6 +34,7 @@ export class AgencyController {
   @ApiResponse({
     status: 200,
     description: 'Successfully fetched all agencies.',
+    type: [Agency],
   })
   async findAll(): Promise<Agency[]> {
     return this.agencyService.findAll();
@@ -44,6 +45,7 @@ export class AgencyController {
   @ApiResponse({
     status: 200,
     description: 'Successfully fetched the agency by ID.',
+    type: Agency,
   })
   @ApiResponse({ status: 404, description: 'Agency not found' })
   async findOne(@Param('id') id: string): Promise<Agency> {

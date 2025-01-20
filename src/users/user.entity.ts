@@ -39,11 +39,11 @@ export class User {
   @ApiProperty()
   @Column({ default: false })
   isEmailVerified: boolean;
-  
+
   @Column()
   @Exclude({ toPlainOnly: true })
   password: string;
-  
+
   @ApiProperty()
   @Column({ nullable: true })
   bio: string;
