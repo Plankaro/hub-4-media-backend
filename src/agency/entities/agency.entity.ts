@@ -33,44 +33,48 @@ export class Agency {
   @Column({ type: 'varchar', length: 255, nullable: true })
   website: string;
 
+  @ApiProperty({ type: () => Contact })
   @OneToOne(() => Contact, { cascade: true })
   @JoinColumn()
   contact: Contact;
 
+  @ApiProperty({ type: () => Social })
   @OneToOne(() => Social, { cascade: true })
   @JoinColumn()
   social: Social;
 
-  @ApiProperty({ description: 'Timeslots of the agency' })
+  @ApiProperty({ description: 'Timeslots of the agency', type: () => [Timeslot] })
   @OneToMany(() => Timeslot, (timeslot) => timeslot.agency, { cascade: true })
   timeSlots: Timeslot[];
 
+  @ApiProperty({ type: () => Location })
   @OneToOne(() => Location, { cascade: true })
   @JoinColumn()
   location: Location;
 
+  @ApiProperty({ description: 'Services', type: () => [AgencyServiceEntity] })
   @OneToMany(
     () => AgencyServiceEntity,
     (agencyServiceEntity) => agencyServiceEntity.agency,
   )
   services: AgencyServiceEntity[];
 
-  @ApiProperty({ description: 'Available services of the agency' })
+  @ApiProperty({ description: 'Available services of the agency', type: () => [String] })
   @Column({ type: 'simple-array' })
   availableServices: string[];
 
-  @ApiProperty({ description: 'Agency description or tagline' })
+  @ApiProperty({ description: 'Agency description or tagline', type: () => String })
   @Column({ type: 'text' })
   description: string;
 
-  @ApiProperty({ description: 'URL to the agency’s logo or profile picture' })
+  @ApiProperty({ description: 'URL to the agency’s logo or profile picture', type: () => String })
   @Column({ type: 'varchar', length: 255, nullable: true })
   pictureUrl: string;
 
-  @ApiProperty({ description: 'Agency status (active or inactive)' })
+  @ApiProperty({ description: 'Agency status (active or inactive)', type: () => String })
   @Column({ type: 'varchar', length: 50, default: 'ACTIVE' })
   status: string;
-  
+
   @ApiProperty({ description: 'youtube video url' })
   @Column({ type: 'varchar', length: 255, default: 'ACTIVE' })
   videoUrl: string;

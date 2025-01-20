@@ -12,6 +12,7 @@ import { CreateAgencyDto } from './dto/create-agency.dto';
 import { UpdateAgencyDto } from './dto/update-agency.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Agency } from './entities/agency.entity';
+import { CreateAgencyServiceDto } from './dto/agency-service.dto';
 
 @ApiTags('agencies')
 @Controller('agencies')
