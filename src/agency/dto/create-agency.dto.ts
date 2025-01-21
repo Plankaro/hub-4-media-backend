@@ -63,12 +63,11 @@ export class CreateAgencyDto {
   // @IsOptional()
   // @IsUrl()
   // pictureUrl?: string;
-
   @ApiProperty({ type: ImageUploadDto, required: false })
   @IsOptional()
-  @ValidateNested()
-  @Type(() => ImageUploadDto)
-  agencyLogo: ImageUploadDto;
+  // @ValidateNested()
+  // @Type(() => ImageUploadDto)
+  agencyLogo?: ImageUploadDto;
 
   @ApiProperty({
     description: 'Agency status (active or inactive)',

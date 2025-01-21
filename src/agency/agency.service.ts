@@ -1,8 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAgencyDto } from './dto/create-agency.dto';
@@ -37,20 +33,17 @@ export class AgencyService {
   ) {}
 
   // Create Agency
-  async create({
-    agencyLogo,
-    ...createAgencyDto
-  }: CreateAgencyDto): Promise<Agency> {
+  async create(createAgencyDto: CreateAgencyDto): Promise<Agency> {
     // Transform the DTO to entity if necessary
 
-    let uploadedImage: ImageEntity[] = [];
+    const uploadedImage: ImageEntity[] = [];
     try {
       const imageUpload = await this.cloudinaryService.uploadFiles([
-        // {
-        //   data: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
-        //   imageName: 'agency-logo',
-        // },
-        agencyLogo,
+        {
+          data: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
+          imageName: 'agency-logo',
+        },
+        // agencyLogo,
       ]);
 
       await Promise.all(
@@ -73,35 +66,44 @@ export class AgencyService {
       createAgencyDto,
     );
 
-    const agency = this.agencyRepository.create({
-      agencyLogo: uploadedImage[0],
-      ...createAgencyDto,
+    // const agency = this.agencyRepository.create({
+    //   agencyLogo: uploadedImage[0],
+    //   ...createAgencyDto,
+    // });
+
+    return await this.agencyRepository.manager.transaction(async (manager) => {
+      const contact = await manager.save(
+        this.contactRepository.create(createAgencyDto.contact),
+      );
+      const social = await manager.save(
+        this.socialRepository.create(createAgencyDto.social),
+      );
+      const location = await manager.save(
+        this.locationRepository.create(createAgencyDto.location),
+      );
+      const timeslots = await manager.save(
+        this.timeslotRepository.create(createAgencyDto.timeSlots),
+      );
+      const agencyServices = await manager.save(
+        this.agencyServiceRepository.create(createAgencyDto.agencyService),
+      );
+
+      const agency = manager.create(Agency, {
+        ...(uploadedImage.length && { agencyLogo: uploadedImage[0] }),
+        contact,
+        social,
+        location,
+        timeSlots: timeslots,
+        services: agencyServices,
+        ...createAgencyDto,
+      });
+
+      console.log(
+        '🚀 ~ AgencyService ~ returnawaitthis.agencyRepository.manager.transaction ~ agency:',
+        agency,
+      );
+      return await manager.save(agency);
     });
-
-    // Save contact, social, location, and timeslots
-    const contact = await this.contactRepository.save(createAgencyDto.contact);
-    const social = await this.socialRepository.save(createAgencyDto.social);
-    const location = await this.locationRepository.save(
-      createAgencyDto.location,
-    );
-
-    // Handle timeslot as an array
-    // const timeslots = await this.timeslotRepository.save(
-    //   createAgencyDto.timeSlots,
-    // );
-    const agencyServices = await this.agencyServiceRepository.save(
-      createAgencyDto.agencyService,
-    );
-
-    // Attach relations to the agency
-    agency.contact = contact;
-    agency.social = social;
-    agency.location = location;
-    // agency.timeSlots = timeslots;
-    agency.services = agencyServices;
-
-    // Save the agency with its related entities
-    return await this.agencyRepository.save(agency);
   }
 
   // Get all agencies

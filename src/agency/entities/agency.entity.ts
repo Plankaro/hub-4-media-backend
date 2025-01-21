@@ -85,11 +85,9 @@ export class Agency {
   // @Column({ type: 'varchar', length: 255, nullable: true })
   // pictureUrl: string;
 
-  @ApiProperty({
-    description: 'URL to the agency’s logo or profile picture',
-    type: () => ImageEntity,
-  })
-  @OneToOne(() => ImageEntity, { cascade: true })
+  @ApiProperty({ type: () => ImageEntity })
+  @OneToOne(() => ImageEntity, (image) => image.agencyService)
+  @JoinColumn()
   agencyLogo: ImageEntity;
 
   @ApiProperty({

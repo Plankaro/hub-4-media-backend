@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Agency } from 'src/agency/entities';
 import { BlogPost } from 'src/blog/entities';
 import {
   AboutOurCompany,
@@ -90,6 +91,9 @@ export class ImageEntity {
   })
   agency: VerifiedAgencies;
 
+  @OneToOne(() => Agency, (agency) => agency.agencyLogo, { cascade: true })
+  agencyService: Agency;
+
   @OneToOne(() => OfferHeadings, (offer) => offer.image, {
     nullable: true,
   })
@@ -119,7 +123,7 @@ export class ImageEntity {
     nullable: true,
   })
   extraService: ExtraService;
-  
+
   @OneToOne(() => User, (user) => user.image, {
     nullable: true,
   })

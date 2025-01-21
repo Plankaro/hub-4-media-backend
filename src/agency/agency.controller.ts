@@ -12,7 +12,6 @@ import { CreateAgencyDto } from './dto/create-agency.dto';
 import { UpdateAgencyDto } from './dto/update-agency.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Agency } from './entities/agency.entity';
-import { CreateAgencyServiceDto } from './dto/agency-service.dto';
 
 @ApiTags('agencies')
 @Controller('agencies')
@@ -27,7 +26,10 @@ export class AgencyController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async create(@Body() createAgencyDto: CreateAgencyDto): Promise<Agency> {
-    console.log("🚀 ~ AgencyController ~ create ~ createAgencyDto:", createAgencyDto)
+    console.log(
+      '🚀 ~ AgencyController ~ create ~ createAgencyDto:',
+      createAgencyDto,
+    );
     return this.agencyService.create(createAgencyDto);
   }
 
