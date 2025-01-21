@@ -20,6 +20,6 @@ export class Timeslot {
   @Column({ type: 'varchar', length: 50 })
   to: string;
 
-  @ManyToOne(() => Agency, (agency) => agency.timeSlots, {cascade: true})
+  @ManyToOne(() => Agency, (agency) => agency.timeSlots, { cascade: true })
   agency: Agency;
 }

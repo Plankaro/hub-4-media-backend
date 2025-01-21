@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  IsUUID,
   ValidateNested,
 } from 'class-validator';
 import { CreateAgencyServiceDto } from './agency-service.dto';
@@ -106,4 +107,15 @@ export class CreateAgencyDto {
   @IsOptional()
   @IsArray()
   timeSlots?: TimeslotDto[];
+
+  @ApiProperty({ description: 'The category of the agency', required: true })
+  @IsUUID()
+  categoryId: string;
+
+  @ApiProperty({
+    description: 'The sub category of the agency',
+    required: true,
+  })
+  @IsUUID()
+  subCategoryId: string;
 }

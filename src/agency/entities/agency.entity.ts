@@ -8,6 +8,8 @@ import {
   UpdateDateColumn,
   OneToMany,
   DeleteDateColumn,
+  Index,
+  ManyToOne,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Contact } from './contact.entity';
@@ -16,6 +18,8 @@ import { Location } from './location.entity';
 import { Timeslot } from './timeslot.entity';
 import { AgencyServiceEntity } from './service.entity';
 import { ImageEntity } from 'src/common/entities';
+import { AgencyCategory } from './category.entity';
+import { AgencySubCategory } from './sub-category';
 
 @Entity('agencies')
 export class Agency {
@@ -111,6 +115,17 @@ export class Agency {
   @ApiProperty({ description: 'The date the agency was featured' })
   @Column({ type: 'boolean', default: false })
   featured: boolean;
+
+  @Index()
+  @ApiProperty({ type: () => AgencyCategory })
+  @ManyToOne(() => AgencyCategory, (category) => category.agencies)
+  @JoinColumn()
+  category: AgencyCategory;
+
+  @ApiProperty({ type: () => AgencySubCategory })
+  @ManyToOne(() => AgencySubCategory, (subCategory) => subCategory.agencies)
+  @JoinColumn()
+  subCategory: AgencySubCategory;
 
   @ApiProperty({ description: 'The date the agency was created' })
   @CreateDateColumn({ type: 'timestamp' })

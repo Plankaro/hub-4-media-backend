@@ -15,25 +15,29 @@ import { Timeslot } from './entities/timeslot.entity';
 import { AgencyServiceEntity } from './entities/service.entity';
 import { ImageEntity } from 'src/common/entities';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { AgencyQueryValidatorDto } from './dto/agency-query.dto';
+import { AgencysListDto } from './dto/agency-list.dto';
+import { getPaginationMeta } from 'src/common/utility';
+import { SortOrder } from 'src/common/types';
 
 @Injectable()
 export class AgencyService {
   constructor(
     @InjectRepository(Agency)
-    private agencyRepository: Repository<Agency>,
+    private readonly agencyRepository: Repository<Agency>,
     @InjectRepository(Contact)
-    private contactRepository: Repository<Contact>,
+    private readonly contactRepository: Repository<Contact>,
     @InjectRepository(Social)
-    private socialRepository: Repository<Social>,
+    private readonly socialRepository: Repository<Social>,
     @InjectRepository(Location)
-    private locationRepository: Repository<Location>,
+    private readonly locationRepository: Repository<Location>,
     @InjectRepository(Timeslot)
-    private timeslotRepository: Repository<Timeslot>,
+    private readonly timeslotRepository: Repository<Timeslot>,
     @InjectRepository(AgencyServiceEntity)
-    private agencyServiceRepository: Repository<AgencyServiceEntity>,
+    private readonly agencyServiceRepository: Repository<AgencyServiceEntity>,
     @InjectRepository(ImageEntity)
-    private imageRepo: Repository<ImageEntity>,
-    private cloudinaryService: CloudinaryService,
+    private readonly imageRepo: Repository<ImageEntity>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   // Create Agency
@@ -49,11 +53,6 @@ export class AgencyService {
         createAgencyDto.agencyLogo,
       );
       console.log('🚀 ~ AgencyService ~ create ~ imageUpload:', imageUpload);
-
-      // const agency = this.agencyRepository.create({
-      //   agencyLogo: uploadedImage[0],
-      //   ...createAgencyDto,
-      // });
 
       if (!imageUpload || imageUpload.length === 0) {
         throw new BadRequestException(
@@ -87,7 +86,8 @@ export class AgencyService {
             this.agencyServiceRepository.create(createAgencyDto.agencyService),
           );
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { agencyLogo, ...rest } = createAgencyDto;
+          const { agencyLogo, categoryId, subCategoryId, ...rest } =
+            createAgencyDto;
 
           const agency = manager.create(Agency, {
             agencyLogo: {
@@ -98,13 +98,15 @@ export class AgencyService {
             location,
             timeSlots: timeslots,
             services: agencyServices,
+            category: {
+              id: categoryId,
+            },
+            subCategory: {
+              id: subCategoryId,
+            },
             ...rest,
           });
 
-          // console.log(
-          //   '🚀 ~ AgencyService ~ returnawaitthis.agencyRepository.manager.transaction ~ agency:',
-          //   agency,
-          // );
           return await manager.save(agency);
         },
       );
@@ -114,18 +116,63 @@ export class AgencyService {
     }
   }
 
-  // Get all agencies
-  async findAll(): Promise<Agency[]> {
-    return this.agencyRepository.find({
-      relations: [
+  async findAll(body: AgencyQueryValidatorDto): Promise<AgencysListDto> {
+    const pageSize = body.pageSize || 10;
+    const pageIndex = body.pageIndex || 0;
+    const query = this.agencyRepository
+      .createQueryBuilder('agency')
+      .leftJoinAndSelect('agency.category', 'category')
+      .leftJoinAndSelect('agency.contact', 'contact')
+      .leftJoinAndSelect('agency.social', 'social')
+      .leftJoinAndSelect('agency.location', 'location')
+      .leftJoinAndSelect('agency.timeSlots', 'timeSlots')
+      .leftJoinAndSelect('agency.services', 'services')
+      .leftJoinAndSelect('agency.agencyLogo', 'agencyLogo')
+      .leftJoinAndSelect('category.subCategories', 'subCategory')
+      .select([
+        'agency',
+        'category',
+        'subCategory',
         'contact',
         'social',
         'location',
         'timeSlots',
         'services',
         'agencyLogo',
-      ],
-    });
+      ])
+      .skip(pageIndex * pageSize)
+      .take(pageSize);
+
+    // Common filters
+    if (body.order) {
+      query.orderBy('agency.updatedAt', body.order);
+    } else {
+      query.orderBy('agency.updatedAt', SortOrder.DESC);
+    }
+
+    if (body.categoryId) {
+      query.andWhere('category.id = :categoryId', {
+        categoryId: body.categoryId,
+      });
+    }
+
+    if (body.subCategoryId) {
+      query.andWhere('subCategory.id = :subCategoryId', {
+        subCategoryId: body.subCategoryId,
+      });
+    }
+
+    const [agencies, totalItems] = await query.getManyAndCount();
+
+    const paginationMeta = getPaginationMeta(
+      { pageIndex, pageSize },
+      { totalItems, itemsOnPage: agencies.length },
+    );
+
+    return {
+      agencies,
+      paginationMeta,
+    };
   }
 
   // Get agency by ID
@@ -144,6 +191,9 @@ export class AgencyService {
   }
 
   // Update Agency
+  /*
+   * TODO: need to check this again
+   */
   async update(id: string, updateAgencyDto: UpdateAgencyDto): Promise<Agency> {
     // You can handle the update logic here
     await this.agencyRepository.update(id, updateAgencyDto);

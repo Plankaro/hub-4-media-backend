@@ -6,12 +6,18 @@ import {
   Param,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { AgencyService } from './agency.service';
 import { CreateAgencyDto } from './dto/create-agency.dto';
 import { UpdateAgencyDto } from './dto/update-agency.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { Agency } from './entities/agency.entity';
+import { AgencysListDto } from './dto/agency-list.dto';
+import {
+  AgencyQueryDto,
+  AgencyQueryValidatorDto,
+} from './dto/agency-query.dto';
 
 @ApiTags('agencies')
 @Controller('agencies')
@@ -40,8 +46,11 @@ export class AgencyController {
     description: 'Successfully fetched all agencies.',
     type: [Agency],
   })
-  async findAll(): Promise<Agency[]> {
-    return this.agencyService.findAll();
+  @ApiQuery({ type: () => AgencyQueryDto })
+  async findAll(
+    @Query() query: AgencyQueryValidatorDto,
+  ): Promise<AgencysListDto> {
+    return this.agencyService.findAll(query);
   }
 
   @Get(':id')
