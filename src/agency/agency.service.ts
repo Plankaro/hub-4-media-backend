@@ -86,6 +86,8 @@ export class AgencyService {
           const agencyServices = await manager.save(
             this.agencyServiceRepository.create(createAgencyDto.agencyService),
           );
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { agencyLogo, ...rest } = createAgencyDto;
 
           const agency = manager.create(Agency, {
             agencyLogo: {
@@ -96,7 +98,7 @@ export class AgencyService {
             location,
             timeSlots: timeslots,
             services: agencyServices,
-            ...createAgencyDto,
+            ...rest,
           });
 
           // console.log(
