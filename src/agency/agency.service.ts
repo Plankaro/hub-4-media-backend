@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAgencyDto } from './dto/create-agency.dto';
@@ -33,83 +37,92 @@ export class AgencyService {
   ) {}
 
   // Create Agency
-  async create(createAgencyDto: CreateAgencyDto): Promise<Agency> {
+  async create(createAgencyDto: CreateAgencyDto): Promise<any> {
     // Transform the DTO to entity if necessary
-
-    const uploadedImage: ImageEntity[] = [];
-    try {
-      const imageUpload = await this.cloudinaryService.uploadFiles([
-        {
-          data: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
-          imageName: 'agency-logo',
-        },
-        // agencyLogo,
-      ]);
-
-      await Promise.all(
-        imageUpload.map(async (image) => {
-          const savedImage = await this.imageRepo.save({
-            imageName: image.original_filename,
-            imageUrl: image.url,
-          });
-          uploadedImage.push(savedImage);
-        }),
-      );
-    } catch (error) {
-      console.log(`Error uploading service image: `, error);
-      throw new InternalServerErrorException();
-    }
-
     console.log(
-      '🚀 ~ AgencyService ~ imageUpload.map ~ uploadedImage:',
-      uploadedImage,
-      createAgencyDto,
+      '🚀 ~ AgencyService ~ create ~ createAgencyDto.agencyLogo:',
+      createAgencyDto.agencyLogo,
     );
 
-    // const agency = this.agencyRepository.create({
-    //   agencyLogo: uploadedImage[0],
-    //   ...createAgencyDto,
-    // });
+    try {
+      const imageUpload = await this.cloudinaryService.uploadFiles(
+        createAgencyDto.agencyLogo,
+      );
+      console.log('🚀 ~ AgencyService ~ create ~ imageUpload:', imageUpload);
 
-    return await this.agencyRepository.manager.transaction(async (manager) => {
-      const contact = await manager.save(
-        this.contactRepository.create(createAgencyDto.contact),
-      );
-      const social = await manager.save(
-        this.socialRepository.create(createAgencyDto.social),
-      );
-      const location = await manager.save(
-        this.locationRepository.create(createAgencyDto.location),
-      );
-      const timeslots = await manager.save(
-        this.timeslotRepository.create(createAgencyDto.timeSlots),
-      );
-      const agencyServices = await manager.save(
-        this.agencyServiceRepository.create(createAgencyDto.agencyService),
-      );
+      // const agency = this.agencyRepository.create({
+      //   agencyLogo: uploadedImage[0],
+      //   ...createAgencyDto,
+      // });
 
-      const agency = manager.create(Agency, {
-        ...(uploadedImage.length && { agencyLogo: uploadedImage[0] }),
-        contact,
-        social,
-        location,
-        timeSlots: timeslots,
-        services: agencyServices,
-        ...createAgencyDto,
-      });
+      if (!imageUpload || imageUpload.length === 0) {
+        throw new BadRequestException(
+          'Image upload failed or returned no data.',
+        );
+      }
 
-      console.log(
-        '🚀 ~ AgencyService ~ returnawaitthis.agencyRepository.manager.transaction ~ agency:',
-        agency,
+      return await this.agencyRepository.manager.transaction(
+        async (manager) => {
+          const savedImage = await manager.save(
+            this.imageRepo.create({
+              imageName: imageUpload?.[0].original_filename,
+              imageUrl: imageUpload?.[0].url,
+            }),
+          );
+          console.log('🚀 ~ AgencyService ~ savedImage:', savedImage);
+
+          const contact = await manager.save(
+            this.contactRepository.create(createAgencyDto.contact),
+          );
+          const social = await manager.save(
+            this.socialRepository.create(createAgencyDto.social),
+          );
+          const location = await manager.save(
+            this.locationRepository.create(createAgencyDto.location),
+          );
+          const timeslots = await manager.save(
+            this.timeslotRepository.create(createAgencyDto.timeSlots),
+          );
+          const agencyServices = await manager.save(
+            this.agencyServiceRepository.create(createAgencyDto.agencyService),
+          );
+
+          const agency = manager.create(Agency, {
+            agencyLogo: {
+              id: savedImage.id,
+            },
+            contact,
+            social,
+            location,
+            timeSlots: timeslots,
+            services: agencyServices,
+            ...createAgencyDto,
+          });
+
+          // console.log(
+          //   '🚀 ~ AgencyService ~ returnawaitthis.agencyRepository.manager.transaction ~ agency:',
+          //   agency,
+          // );
+          return await manager.save(agency);
+        },
       );
-      return await manager.save(agency);
-    });
+    } catch (error) {
+      console.error(`Error uploading service image: `, error);
+      throw new InternalServerErrorException();
+    }
   }
 
   // Get all agencies
   async findAll(): Promise<Agency[]> {
     return this.agencyRepository.find({
-      relations: ['contact', 'social', 'location', 'timeSlots', 'services'],
+      relations: [
+        'contact',
+        'social',
+        'location',
+        'timeSlots',
+        'services',
+        'agencyLogo',
+      ],
     });
   }
 
@@ -117,7 +130,14 @@ export class AgencyService {
   async findOne(id: string): Promise<Agency> {
     return this.agencyRepository.findOne({
       where: { id },
-      relations: ['contact', 'social', 'location', 'timeSlots', 'services'],
+      relations: [
+        'contact',
+        'social',
+        'location',
+        'timeSlots',
+        'services',
+        'agencyLogo',
+      ],
     });
   }
 
@@ -135,6 +155,6 @@ export class AgencyService {
 
   // Delete Agency
   async remove(id: string): Promise<void> {
-    await this.agencyRepository.delete(id);
+    await this.agencyRepository.softDelete(id);
   }
 }

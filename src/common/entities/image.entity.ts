@@ -91,7 +91,7 @@ export class ImageEntity {
   })
   agency: VerifiedAgencies;
 
-  @OneToOne(() => Agency, (agency) => agency.agencyLogo, { cascade: true })
+  @OneToOne(() => Agency, (agency) => agency.agencyLogo, { nullable: true })
   agencyService: Agency;
 
   @OneToOne(() => OfferHeadings, (offer) => offer.image, {

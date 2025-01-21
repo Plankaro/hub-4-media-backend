@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Contact } from './contact.entity';
@@ -86,7 +87,9 @@ export class Agency {
   // pictureUrl: string;
 
   @ApiProperty({ type: () => ImageEntity })
-  @OneToOne(() => ImageEntity, (image) => image.agencyService)
+  @OneToOne(() => ImageEntity, (image) => image.agencyService, {
+    cascade: true,
+  })
   @JoinColumn()
   agencyLogo: ImageEntity;
 
@@ -116,4 +119,8 @@ export class Agency {
   @ApiProperty({ description: 'The date the agency details were last updated' })
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @ApiProperty({ description: 'The date the agency was deleted' })
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt: Date;
 }

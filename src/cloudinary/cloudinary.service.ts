@@ -6,7 +6,7 @@ import {
 } from 'cloudinary';
 import { Readable } from 'stream';
 import { filter, isEmpty } from 'lodash';
-import { ImageUploadDto } from 'src/common/dtos/image-upload.dto';
+import { ImageUploadDto } from 'src/common/dtos';
 
 @Injectable()
 export class CloudinaryService {
@@ -18,7 +18,7 @@ export class CloudinaryService {
     }
     files = Array.isArray(files) ? files : [files];
     return Promise.all(
-      filter(files, (value) => !!value).map((file: ImageUploadDto) => {
+      filter(files, (value) => !!value).map((file) => {
         const { imageName, data } = file;
         const base64String = data.split(',')[1];
         const buffer = Buffer.from(base64String, 'base64');
