@@ -1,19 +1,20 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsUrl,
   IsArray,
+  IsBoolean,
   IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUrl,
   ValidateNested,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { ContactDto } from './contact.dto';
-import { SocialDto } from './social.dto';
-import { LocationDto } from './location.dto';
-import { TimeslotDto } from './timeslot.dto';
-import { Type } from 'class-transformer';
 import { CreateAgencyServiceDto } from './agency-service.dto';
+import { AgencyContactDto } from './contact.dto';
+import { LocationDto } from './location.dto';
+import { SocialDto } from './social.dto';
+import { TimeslotDto } from './timeslot.dto';
+import { ImageUploadDto } from 'src/common/dtos';
 
 export class CreateAgencyDto {
   @ApiProperty({ description: 'Name of the agency' })
@@ -33,8 +34,8 @@ export class CreateAgencyDto {
 
   @ApiProperty({ description: 'Contact information of the agency' })
   @ValidateNested()
-  @Type(() => ContactDto)
-  contact: ContactDto;
+  @Type(() => AgencyContactDto)
+  contact: AgencyContactDto;
 
   @ApiProperty({ description: 'Social media links of the agency' })
   @ValidateNested()
@@ -59,9 +60,15 @@ export class CreateAgencyDto {
     description: 'URL to the agency’s logo or profile picture',
     required: false,
   })
+  // @IsOptional()
+  // @IsUrl()
+  // pictureUrl?: string;
+
+  @ApiProperty({ type: ImageUploadDto, required: false })
   @IsOptional()
-  @IsUrl()
-  pictureUrl?: string;
+  @ValidateNested()
+  @Type(() => ImageUploadDto)
+  agencyLogo: ImageUploadDto;
 
   @ApiProperty({
     description: 'Agency status (active or inactive)',

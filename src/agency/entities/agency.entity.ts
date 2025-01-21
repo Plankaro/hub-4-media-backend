@@ -14,6 +14,7 @@ import { Social } from './social.entity';
 import { Location } from './location.entity';
 import { Timeslot } from './timeslot.entity';
 import { AgencyServiceEntity } from './service.entity';
+import { ImageEntity } from 'src/common/entities';
 
 @Entity('agencies')
 export class Agency {
@@ -43,8 +44,14 @@ export class Agency {
   @JoinColumn()
   social: Social;
 
-  @ApiProperty({ description: 'Timeslots of the agency', type: () => [Timeslot] })
-  @OneToMany(() => Timeslot, (timeslot) => timeslot.agency, { cascade: true })
+  @ApiProperty({
+    description: 'Timeslots of the agency',
+    type: () => [Timeslot],
+  })
+  @OneToMany(() => Timeslot, (timeslot) => timeslot.agency, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
   timeSlots: Timeslot[];
 
   @ApiProperty({ type: () => Location })
@@ -57,21 +64,38 @@ export class Agency {
     () => AgencyServiceEntity,
     (agencyServiceEntity) => agencyServiceEntity.agency,
   )
+  @JoinColumn()
   services: AgencyServiceEntity[];
 
-  @ApiProperty({ description: 'Available services of the agency', type: () => [String] })
+  @ApiProperty({
+    description: 'Available services of the agency',
+    type: () => [String],
+  })
   @Column({ type: 'simple-array' })
   availableServices: string[];
 
-  @ApiProperty({ description: 'Agency description or tagline', type: () => String })
+  @ApiProperty({
+    description: 'Agency description or tagline',
+    type: () => String,
+  })
   @Column({ type: 'text' })
   description: string;
 
-  @ApiProperty({ description: 'URL to the agency’s logo or profile picture', type: () => String })
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  pictureUrl: string;
+  // @ApiProperty({ description: 'URL to the agency’s logo or profile picture', type: () => String })
+  // @Column({ type: 'varchar', length: 255, nullable: true })
+  // pictureUrl: string;
 
-  @ApiProperty({ description: 'Agency status (active or inactive)', type: () => String })
+  @ApiProperty({
+    description: 'URL to the agency’s logo or profile picture',
+    type: () => ImageEntity,
+  })
+  @OneToOne(() => ImageEntity, { cascade: true })
+  agencyLogo: ImageEntity;
+
+  @ApiProperty({
+    description: 'Agency status (active or inactive)',
+    type: () => String,
+  })
   @Column({ type: 'varchar', length: 50, default: 'ACTIVE' })
   status: string;
 

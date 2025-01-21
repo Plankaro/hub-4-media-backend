@@ -27,6 +27,7 @@ export class AgencyController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async create(@Body() createAgencyDto: CreateAgencyDto): Promise<Agency> {
+    console.log("🚀 ~ AgencyController ~ create ~ createAgencyDto:", createAgencyDto)
     return this.agencyService.create(createAgencyDto);
   }
 
@@ -68,7 +69,7 @@ export class AgencyController {
   @ApiOperation({ summary: 'Delete agency by ID' })
   @ApiResponse({ status: 200, description: 'Successfully deleted the agency.' })
   @ApiResponse({ status: 404, description: 'Agency not found' })
-  async remove(@Param('id') id: number): Promise<void> {
+  async remove(@Param('id') id: string): Promise<void> {
     return this.agencyService.remove(id);
   }
 }

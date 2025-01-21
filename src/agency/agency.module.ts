@@ -4,6 +4,7 @@ import { AgencyService } from './agency.service';
 import { AgencyController } from './agency.controller';
 import { Agency, Contact, LocationEntity, Social, Timeslot } from './entities';
 import { AgencyServiceEntity } from './entities/service.entity';
+import { ImageEntity } from 'src/common/entities';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AgencyServiceEntity } from './entities/service.entity';
       LocationEntity,
       Timeslot,
       AgencyServiceEntity,
+      ImageEntity,
     ]),
   ],
   providers: [AgencyService],
