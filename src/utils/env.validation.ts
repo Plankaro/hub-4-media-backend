@@ -119,6 +119,31 @@ export class EnvironmentVariable {
   @IsNotEmpty()
   @IsString()
   COOKIES_DOMAIN: string;
+
+  // Database Configuration
+  @IsNotEmpty()
+  @IsString()
+  DB_HOST: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  DB_PORT: number;
+
+  @IsNotEmpty()
+  @IsString()
+  DB_USERNAME: string;
+
+  @IsNotEmpty()
+  @IsString()
+  DB_PASSWORD: string;
+
+  @IsNotEmpty()
+  @IsString()
+  DB_NAME: string;
+
+  @IsNotEmpty()
+  @IsString()
+  DB_SSL_REJECT_UNAUTHORIZED: string;
 }
 
 export type EnvironmentVariableType = EnvironmentVariable;
