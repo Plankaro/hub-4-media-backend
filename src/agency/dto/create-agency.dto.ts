@@ -109,13 +109,13 @@ export class CreateAgencyDto {
   timeSlots?: TimeslotDto[];
 
   @ApiProperty({ description: 'The category of the agency', required: true })
-  @IsString()
+  @IsUUID()
   categoryId: string;
 
   @ApiProperty({
     description: 'The sub category of the agency',
     required: true,
   })
-  @IsString()
+  @IsUUID()
   subCategoryId: string;
 }

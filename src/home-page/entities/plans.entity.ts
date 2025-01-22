@@ -35,14 +35,6 @@ export class Plans {
   price: number;
 
   @ApiProperty({
-    description: 'Billing cycle for the plan.',
-    example: 'monthly',
-    enum: ['monthly', 'yearly'],
-  })
-  @Column({ type: 'enum', enum: ['monthly', 'yearly'] })
-  billingCycle: 'monthly' | 'yearly';
-
-  @ApiProperty({
     description: 'Description of the plan.',
     example: 'This is the basic plan',
     type: 'string',
