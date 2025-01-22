@@ -207,6 +207,7 @@ export class AgencyService {
 
   // Delete Agency
   async remove(id: string): Promise<void> {
+    console.log('🚀 ~ AgencyService ~ remove ~ id:', id);
     await this.agencyRepository.softDelete(id);
   }
 }

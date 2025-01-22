@@ -31,12 +31,12 @@ import { AgencyModule } from './agency/agency.module';
       useFactory: async (configService: ConfigService) =>
         getTypeOrmConfig(configService),
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 30 * 1000, // 30s
-        limit: 30, // Later reduce this requests
-      },
-    ]),
+    // ThrottlerModule.forRoot([
+    //   {
+    //     ttl: 30 * 1000, // 30s
+    //     limit: 30, // Later reduce this requests
+    //   },
+    // ]),
     AuthModule,
     UsersModule,
     CloudinaryModule,

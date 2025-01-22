@@ -101,7 +101,16 @@ export const getTypeOrmConfig = async (
 ): Promise<DataSourceOptions> => {
   return {
     ...commonTypeOrmConfig,
-    url: configService.getOrThrow<string>('DB_URL'),
+    host: 'hub-4-media-db-do-user-16680331-0.j.db.ondigitalocean.com',
+    port: 25060,
+    username: 'doadmin',
+    password: 'AVNS_8kS7EN80s_jrDW-LMde', // Updated password
+    database: 'defaultdb',
+    ssl: {
+      rejectUnauthorized: false, // Depending on your setup, this might be true or false
+      // Use 'sslmode=require' for SSL connection
+    },
+    // url: configService.getOrThrow<string>('DB_URL'),
   };
 };
 
