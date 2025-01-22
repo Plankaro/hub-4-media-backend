@@ -11,22 +11,41 @@ import {
   CreateAgencyCategoryDto,
   UpdateAgencyCategoryDto,
 } from './dto/create-category.dto';
+import { ImageEntity } from 'src/common/entities';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class AgencyCategoryService {
   constructor(
     @InjectRepository(AgencyCategory)
     private readonly categoryRepo: Repository<AgencyCategory>,
+    @InjectRepository(ImageEntity) private imageRepo: Repository<ImageEntity>,
+    private cloudinaryService: CloudinaryService,
   ) {}
 
   async create({
     title,
     description,
+    image,
     isFeatured,
   }: CreateAgencyCategoryDto): Promise<AgencyCategory> {
+    let uploadedImage: ImageEntity;
+    try {
+      console.log('Image from category,', image);
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
+      });
+    } catch (error) {
+      console.log(`Error uploading category image: `, error);
+      throw new InternalServerErrorException();
+    }
+
     const category = this.categoryRepo.create({
       title,
       description,
+      image: uploadedImage,
       isFeatured,
     });
 
@@ -66,7 +85,7 @@ export class AgencyCategoryService {
 
   getAllCategories(): Promise<AgencyCategory[]> {
     return this.categoryRepo.find({
-      relations: ['subCategories'],
+      relations: ['image', 'subCategories'],
     });
   }
 

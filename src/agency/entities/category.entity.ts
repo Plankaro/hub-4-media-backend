@@ -6,11 +6,13 @@ import {
   Entity,
   JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Agency } from './agency.entity';
 import { AgencySubCategory } from './sub-category';
+import { ImageEntity } from 'src/common/entities';
 
 @Entity()
 export class AgencyCategory {
@@ -26,10 +28,10 @@ export class AgencyCategory {
   @Column()
   description: string;
 
-  // @ApiProperty({ type: () => ImageEntity })
-  // @OneToOne(() => ImageEntity, (image) => image.category)
-  // @JoinColumn()
-  // image: ImageEntity;
+  @ApiProperty({ type: () => ImageEntity })
+  @OneToOne(() => ImageEntity, (image) => image.category)
+  @JoinColumn()
+  image: ImageEntity;
 
   @ApiProperty()
   @Column('boolean', { default: false })

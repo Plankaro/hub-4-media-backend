@@ -340,6 +340,7 @@ export class HomePageService {
     description,
     features,
     isPopular,
+    billingCycle,
   }: CreatePlanDto): Promise<Plans> {
     try {
       const newPlan = this.plansRepo.create({
@@ -348,6 +349,7 @@ export class HomePageService {
         description,
         features,
         isPopular,
+        billingCycle,
       });
 
       return this.plansRepo.save(newPlan);
@@ -359,7 +361,14 @@ export class HomePageService {
 
   async updatePricePlan(
     id: string,
-    { name, price, description, features, isPopular }: CreatePlanDto,
+    {
+      name,
+      price,
+      description,
+      features,
+      isPopular,
+      billingCycle,
+    }: CreatePlanDto,
   ): Promise<Plans> {
     try {
       const existingPlan = await this.plansRepo.findOne({ where: { id } });
@@ -374,6 +383,7 @@ export class HomePageService {
         description,
         features,
         isPopular,
+        billingCycle,
       });
 
       return this.plansRepo.save(existingPlan);

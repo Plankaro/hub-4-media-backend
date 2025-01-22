@@ -1,7 +1,13 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+import { ImageUploadDto } from 'src/common/dtos';
 
 export class CreateAgencyCategoryDto {
   @ApiProperty()
@@ -15,10 +21,10 @@ export class CreateAgencyCategoryDto {
   @IsNotEmpty()
   description: string;
 
-  // @ApiProperty({ type: () => ImageUploadDto })
-  // @ValidateNested()
-  // @Type(() => ImageUploadDto)
-  // image: ImageUploadDto;
+  @ApiProperty({ type: () => ImageUploadDto })
+  @ValidateNested()
+  @Type(() => ImageUploadDto)
+  image: ImageUploadDto;
 
   @ApiProperty({ required: true })
   @IsBoolean()

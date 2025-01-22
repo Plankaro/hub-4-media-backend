@@ -9,7 +9,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { getTypeOrmConfig } from './config/typeorm.config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UsersModule } from './users/users.module';
-import { validate } from './utils/env.validation';
+import {
+  Environment,
+  EnvironmentVariable,
+  validate,
+} from './utils/env.validation';
 import { HomePageModule } from './home-page/home-page.module';
 import { ContactUsPageModule } from './contact-us-page/contact-us.module';
 import { ServicePageModule } from './service-page/service.module';
@@ -28,8 +32,9 @@ import { AgencyModule } from './agency/agency.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) =>
-        getTypeOrmConfig(configService),
+      useFactory: async (
+        configService: ConfigService<EnvironmentVariable, true>,
+      ) => getTypeOrmConfig(configService),
     }),
     ThrottlerModule.forRoot([
       {

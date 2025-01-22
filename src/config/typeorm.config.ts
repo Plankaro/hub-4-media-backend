@@ -97,11 +97,19 @@ const commonTypeOrmConfig: DataSourceOptions = {
 };
 
 export const getTypeOrmConfig = async (
-  configService: ConfigService,
+  configService: ConfigService<EnvironmentVariable, true>,
 ): Promise<DataSourceOptions> => {
   return {
     ...commonTypeOrmConfig,
-    url: configService.getOrThrow<string>('DB_URL'),
+    host: configService.get<string>('DB_HOST'),
+    port: parseInt(configService.get<string>('DB_PORT')),
+    username: configService.get<string>('DB_USERNAME'),
+    password: configService.get<string>('DB_PASSWORD'),
+    database: configService.get<string>('DB_NAME'),
+    ssl: {
+      rejectUnauthorized:
+        configService.get<string>('DB_SSL_REJECT_UNAUTHORIZED') === 'true',
+    },
   };
 };
 
