@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,11 +15,13 @@ import { Location } from './entities/location.entity';
 import { Timeslot } from './entities/timeslot.entity';
 import { AgencyServiceEntity } from './entities/service.entity';
 import { ImageEntity } from 'src/common/entities';
+import { AgencyCategory } from './entities/category.entity';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { AgencyQueryValidatorDto } from './dto/agency-query.dto';
 import { AgencysListDto } from './dto/agency-list.dto';
 import { getPaginationMeta } from 'src/common/utility';
 import { SortOrder } from 'src/common/types';
+import { AgencySubCategory } from './entities/sub-category';
 
 @Injectable()
 export class AgencyService {
@@ -194,15 +197,133 @@ export class AgencyService {
   /*
    * TODO: need to check this again
    */
-  async update(id: string, updateAgencyDto: UpdateAgencyDto): Promise<Agency> {
+  async update(id: string, body: UpdateAgencyDto): Promise<Agency> {
     // You can handle the update logic here
-    await this.agencyRepository.update(id, updateAgencyDto);
+    // await this.agencyRepository.update(id, updateAgencyDto);
+    const updateAgencyDto = { ...body };
+    console.log('agency duo: ', updateAgencyDto);
+    try {
+      const existingAgency = await this.agencyRepository.findOne({
+        where: { id },
+        relations: [
+          'agencyLogo',
+          'contact',
+          'social',
+          'location',
+          'timeSlots',
+          'services',
+          'category',
+          'subCategory',
+        ],
+      });
 
-    // Return the updated agency with its relations
-    return this.agencyRepository.findOne({
-      where: { id },
-      relations: ['contact', 'social', 'location', 'timeSlots'],
-    });
+      if (!existingAgency) {
+        throw new NotFoundException(`Agency with ID ${id} not found.`);
+      }
+
+      let updatedImage = null;
+      if (updateAgencyDto.agencyLogo) {
+        const imageUpload = await this.cloudinaryService.uploadFiles(
+          updateAgencyDto.agencyLogo,
+        );
+
+        if (!imageUpload || imageUpload.length === 0) {
+          throw new BadRequestException(
+            'Image upload failed or returned no data.',
+          );
+        }
+
+        updatedImage = await this.imageRepo.save({
+          imageName: imageUpload[0].original_filename,
+          imageUrl: imageUpload[0].url,
+        });
+
+        existingAgency.agencyLogo = updatedImage;
+      }
+
+      return await this.agencyRepository.manager.transaction(
+        async (manager) => {
+          if (updateAgencyDto.contact) {
+            const updatedContact = await manager.save(
+              this.contactRepository.create({
+                ...existingAgency.contact,
+                ...updateAgencyDto.contact,
+              }),
+            );
+            existingAgency.contact = updatedContact;
+          }
+
+          if (updateAgencyDto.social) {
+            const updatedSocial = await manager.save(
+              this.socialRepository.create({
+                ...existingAgency.social,
+                ...updateAgencyDto.social,
+              }),
+            );
+            existingAgency.social = updatedSocial;
+          }
+
+          if (updateAgencyDto.location) {
+            const updatedLocation = await manager.save(
+              this.locationRepository.create({
+                ...existingAgency.location,
+                ...updateAgencyDto.location,
+              }),
+            );
+            existingAgency.location = updatedLocation;
+          }
+
+          if (updateAgencyDto.timeSlots) {
+            const updatedTimeSlots = await manager.save(
+              this.timeslotRepository.create(updateAgencyDto.timeSlots),
+            );
+            existingAgency.timeSlots = updatedTimeSlots;
+          }
+
+          if (updateAgencyDto.agencyService) {
+            const updatedServices = await manager.save(
+              this.agencyServiceRepository.create(
+                updateAgencyDto.agencyService,
+              ),
+            );
+            existingAgency.services = updatedServices;
+          }
+
+          const { categoryId, subCategoryId, ...rest } = updateAgencyDto;
+
+          if (categoryId) {
+            const category = await manager.findOne(AgencyCategory, {
+              where: { id: categoryId },
+            });
+            if (!category) {
+              throw new NotFoundException(
+                `Category not found with id: ${categoryId}`,
+              );
+            }
+            existingAgency.category = category;
+          }
+          if (subCategoryId) {
+            const subCategory = await manager.findOne(AgencySubCategory, {
+              where: { id: subCategoryId },
+            });
+            console.log('agency sub: ', subCategoryId, subCategory);
+            if (!subCategory) {
+              throw new NotFoundException(
+                `Sub category not found with id: ${subCategoryId}`,
+              );
+            }
+            existingAgency.subCategory = subCategory;
+          }
+
+          Object.assign(existingAgency, rest);
+
+          return await manager.save(existingAgency);
+        },
+      );
+    } catch (error) {
+      console.error(`Error updating agency:`, error);
+      throw new InternalServerErrorException('Failed to update agency.');
+    }
   }
 
   // Delete Agency

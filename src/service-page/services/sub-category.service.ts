@@ -43,6 +43,10 @@ export class ServiceSubCategoryService {
     }
     const category = await this.catgeoryService.getById(categoryId);
 
+    if (!category) {
+      throw new NotFoundException(`Category not found with Id: ${categoryId}`);
+    }
+
     existingCategory.title = title;
     existingCategory.category = category;
 

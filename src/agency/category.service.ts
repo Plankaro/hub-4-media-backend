@@ -31,7 +31,7 @@ export class AgencyCategoryService {
   }: CreateAgencyCategoryDto): Promise<AgencyCategory> {
     let uploadedImage: ImageEntity;
     try {
-      console.log('Image from category,', image);
+      // console.log('data: ,', title, description, image, isFeatured);
       const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
       uploadedImage = await this.imageRepo.save({
         imageName: imageUpload.original_filename,
@@ -54,15 +54,33 @@ export class AgencyCategoryService {
 
   async update(
     id: string,
-    { title, description }: UpdateAgencyCategoryDto,
+    { title, description, image, isFeatured }: UpdateAgencyCategoryDto,
   ): Promise<AgencyCategory> {
+    console.log('Image from category,', image, title, description, isFeatured);
     const existingCategory = await this.categoryRepo.findOne({ where: { id } });
-    if (existingCategory) {
-      throw new NotFoundException(`Category not found with Id: ${id}`);
+    if (!existingCategory) {
+      throw new NotFoundException(`Category not found with Id : ${id}`);
     }
 
     if (title) {
+      // const isTitleExist = await this.categoryRepo.findOne({
+      //   where: { title },
+      // });
+      // if (isTitleExist && isTitleExist.id !== id) {
+      //   throw new InternalServerErrorException(
+      //     'Category with this title already exists',
+      //   );
+      // }
       existingCategory.title = title;
+    }
+
+    if (image) {
+      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
+      const uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
+      });
+      existingCategory.image = uploadedImage;
     }
 
     if (description) {
@@ -75,7 +93,7 @@ export class AgencyCategoryService {
   async getById(id: string): Promise<AgencyCategory> {
     const category = await this.categoryRepo.findOne({
       where: { id },
-      relations: ['subCategories'],
+      relations: ['subCategories', 'image'],
     });
     if (!category) {
       throw new NotFoundException(`Category not found with id: ${id}`);

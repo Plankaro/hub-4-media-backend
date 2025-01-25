@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -35,22 +36,51 @@ export class AgencySubCategoryService {
     id: string,
     { categoryId, title }: CreateAgencySubCategoryDto,
   ): Promise<AgencySubCategory> {
-    const existingCategory = await this.subCategoryRepo.findOne({
+    const existingSubCategory = await this.subCategoryRepo.findOne({
       where: { id },
     });
-    if (existingCategory) {
+    if (!existingSubCategory) {
       throw new NotFoundException(`Sub category not found with Id: ${id}`);
     }
+
     const category = await this.catgeoryService.getById(categoryId);
+    if (!category) {
+      throw new NotFoundException(`Category not found with Id: ${categoryId}`);
+    }
 
-    existingCategory.title = title;
-    existingCategory.category = category;
+    const isAlreadyExist = category.subCategories.find(
+      (subCategory) => subCategory.id === existingSubCategory.id,
+    );
 
-    return this.subCategoryRepo.save(existingCategory);
+    if (isAlreadyExist) {
+      throw new ConflictException(
+        `Sub category already exists in category with id: ${categoryId}`,
+      );
+    }
+
+    // if (title) {
+    //   const isTitleAlreadyExist = await this.subCategoryRepo.findOne({
+    //     where: { title },
+    //   });
+
+    //   if (isTitleAlreadyExist && isTitleAlreadyExist.id !== id) {
+    //     throw new InternalServerErrorException(
+    //       `Subcategory with title "${title}" already exists`,
+    //     );
+    //   }
+    // }
+
+    existingSubCategory.title = title;
+    existingSubCategory.category = category;
+
+    return this.subCategoryRepo.save(existingSubCategory);
   }
 
   async getById(id: string): Promise<AgencySubCategory> {
-    const category = await this.subCategoryRepo.findOne({ where: { id } });
+    const category = await this.subCategoryRepo.findOne({
+      where: { id },
+      relations: ['category'],
+    });
     if (!category) {
       throw new NotFoundException(`Sub category not found with id: ${id}`);
     }
@@ -58,7 +88,7 @@ export class AgencySubCategoryService {
   }
 
   getAllSubCategories(): Promise<AgencySubCategory[]> {
-    return this.subCategoryRepo.find();
+    return this.subCategoryRepo.find({ relations: ['category'] });
   }
 
   async delete(id: string): Promise<SuccessMessageDto> {
