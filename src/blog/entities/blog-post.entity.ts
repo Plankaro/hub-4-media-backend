@@ -13,6 +13,7 @@ import { BlogCategory } from './blog-category.entity';
 
 import { ApiProperty } from '@nestjs/swagger';
 import { ImageEntity } from 'src/common/entities';
+import { BlockNoteContent } from '../types/block-note.types';
 
 @Entity()
 export class BlogPost {
@@ -26,24 +27,15 @@ export class BlogPost {
 
   @ApiProperty()
   @Column('text')
-  intro: string;
+  description: string;
+
+  @ApiProperty({ type: [Object] })
+  @Column('jsonb', { nullable: true })
+  blocks?: BlockNoteContent[];
 
   @ApiProperty()
-  @Column('text')
-  content: string;
-
-  @ApiProperty()
-  @Column({ nullable: true, default: '' })
-  summary: string;
-
-  @ApiProperty({ type: () => ImageEntity })
-  @OneToOne(() => ImageEntity, (image) => image.blog, { cascade: true })
-  @JoinColumn()
-  image: ImageEntity;
-
-  @ApiProperty({ type: () => BlogCategory })
-  @ManyToOne(() => BlogCategory, (category) => category.posts)
-  category: BlogCategory;
+  @Column({ unique: true })
+  slug: string;
 
   @ApiProperty()
   @CreateDateColumn()

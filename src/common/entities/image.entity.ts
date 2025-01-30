@@ -104,11 +104,6 @@ export class ImageEntity {
   })
   howItWorks: HowItWorks;
 
-  @OneToOne(() => BlogPost, (blog) => blog.image, {
-    nullable: true,
-  })
-  blog: BlogPost;
-
   @OneToOne(() => HeroHeadings, (hero) => hero.image, {
     nullable: true,
   })

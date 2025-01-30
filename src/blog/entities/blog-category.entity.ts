@@ -24,9 +24,6 @@ export class BlogCategory {
   @Column({ nullable: true })
   description: string;
 
-  @OneToMany(() => BlogPost, (blogPost) => blogPost.category)
-  posts: BlogPost[];
-
   @ApiProperty()
   @CreateDateColumn()
   createdAt: Date;

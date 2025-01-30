@@ -5,14 +5,19 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreatePostDto, PostQueryValidatorDto, PostsListDto } from '../dtos';
+import { PostQueryValidatorDto, PostsListDto } from '../dtos';
 import { BlogPost } from '../entities';
 import { BlogCategoryService } from './blog-category.service';
-import { cleanHtmlData, getPaginationMeta } from '../../common/utility';
+import { getPaginationMeta } from '../../common/utility';
 import { SortOrder } from '../../common/types';
 
 import { ImageEntity } from 'src/common/entities';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { ImageUploadDto } from 'src/common/dtos';
+import { UpdatePostDto } from '../dtos/update-post.dto';
+import { CreateBlogPostDto } from '../dtos/create-post.dto';
+import { SuccessMessageDto } from 'src/common/dtos';
+import { BlogListResponseDto } from '../dtos/blog-response.dto';
 
 @Injectable()
 export class BlogPostService {
@@ -24,92 +29,63 @@ export class BlogPostService {
     @InjectRepository(ImageEntity) private imageRepo: Repository<ImageEntity>,
   ) {}
 
-  async createPost({
-    intro,
-    summary,
+  async createPost(createPostDto: CreateBlogPostDto): Promise<BlogPost> {
+    const { title, description, blocks } = createPostDto;
 
-    title,
-    content,
-    categoryId,
-
-    image,
-  }: CreatePostDto) {
-    const { category } = await this.categoryService.findCategory(categoryId);
-
-    const cleanedContent = cleanHtmlData(content);
-
-    let uploadedImage: ImageEntity;
-    try {
-      console.log('Image from category,', image);
-      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
-      uploadedImage = await this.imageRepo.save({
-        imageName: imageUpload.original_filename,
-        imageUrl: imageUpload.url,
-      });
-    } catch (error) {
-      console.log(`Error uploading category image: `, error);
-      throw new InternalServerErrorException();
-    }
+    const slug = this.generateUniqueSlug(title);
 
     const newPost = this.postRepo.create({
       title,
-      intro,
-      content: cleanedContent,
-      summary,
-      category,
-      image: uploadedImage,
+      description,
+      blocks: blocks || [],
+      slug,
     });
 
-    const post = await this.postRepo.save(newPost);
+    return await this.postRepo.save(newPost);
+  }
 
-    return post;
+  async uploadImage(body: ImageUploadDto) {
+    try {
+      const imageUpload = (await this.cloudinaryService.uploadFiles(body))[0];
+      const uploadedImage = await this.imageRepo.save({
+        imageName: imageUpload.original_filename,
+        imageUrl: imageUpload.url,
+      });
+
+      return uploadedImage;
+    } catch (err) {
+      console.log('Error uploading image', err);
+      throw new InternalServerErrorException();
+    }
   }
 
   async updatePost(
     postId: string,
-    { intro, summary, title, content, categoryId, image }: CreatePostDto,
-  ) {
+    updateData: UpdatePostDto,
+  ): Promise<BlogPost> {
     const post = await this.getPost(postId);
 
-    let uploadedImage: ImageEntity;
-    try {
-      console.log('Image from category,', image);
-      const imageUpload = (await this.cloudinaryService.uploadFiles(image))[0];
-      uploadedImage = await this.imageRepo.save({
-        imageName: imageUpload.original_filename,
-        imageUrl: imageUpload.url,
-      });
-    } catch (error) {
-      console.log(`Error uploading category image: `, error);
-      throw new InternalServerErrorException();
+    if (updateData.title) {
+      post.title = updateData.title;
+      post.slug = this.generateUniqueSlug(updateData.title);
     }
 
-    const { category } = await this.categoryService.findCategory(categoryId);
+    if (updateData.description) {
+      post.description = updateData.description;
+    }
 
-    const cleanedContent = cleanHtmlData(content);
-
-    post.intro = intro;
-    post.summary = summary;
-    post.title = title;
-    post.content = cleanedContent;
-    post.category = category;
-    post.image = uploadedImage;
+    if (updateData.blocks) {
+      post.blocks = updateData.blocks;
+    }
 
     return await this.postRepo.save(post);
   }
 
-  async getPost(postId: string) {
-    const post = await this.postRepo
-      .createQueryBuilder('post')
-      .leftJoinAndSelect('post.author', 'author')
-      .leftJoinAndSelect('post.category', 'category')
-      .leftJoinAndSelect('post.tags', 'tags')
-      .select(['post'])
-      .where('post.id = :postId', { postId })
-      .getOne();
+  async getPost(postId: string): Promise<BlogPost> {
+    const post = await this.postRepo.findOne({ where: { id: postId } });
 
     if (!post) {
-      throw new NotFoundException('No Post found for the given id');
+      throw new NotFoundException('Blog post not found');
     }
 
     return post;
@@ -159,8 +135,119 @@ export class BlogPostService {
     };
   }
 
-  async deletePost(postId: string) {
+  async deletePost(postId: string): Promise<SuccessMessageDto> {
     await this.postRepo.softDelete({ id: postId });
     return { message: 'Successfully deleted blog post' };
+  }
+
+  async createUntitledPost(): Promise<BlogPost> {
+    const title = 'Untitled';
+    const description = 'Start writing your blog post...';
+    const slug = this.generateUniqueSlug(title);
+
+    const initialBlocks = [
+      {
+        children: [],
+        content: [
+          {
+            styles: {},
+            text: 'Create a new blog post here',
+            type: 'text',
+          },
+        ],
+        id: '5c86b533-1344-4e8b-b354-a4d335d85d5e',
+        props: {
+          backgroundColor: 'default',
+          textAlignment: 'left',
+          textColor: 'default',
+        },
+        type: 'paragraph',
+      },
+      {
+        children: [],
+        content: [
+          {
+            styles: {},
+            text: 'Write Content Here, add / to add content as your need To store updated data',
+            type: 'text',
+          },
+        ],
+        id: 'b4cecdd1-cd72-4c20-b49f-v31fc75afef4',
+        props: {
+          backgroundColor: 'default',
+          textAlignment: 'left',
+          textColor: 'default',
+        },
+        type: 'paragraph',
+      },
+      {
+        children: [],
+        content: [
+          {
+            styles: {},
+            text: 'Hi Hello',
+            type: 'text',
+          },
+        ],
+        id: '6f248acc-109b-4273-b678-f634d540d0b0',
+        props: {
+          backgroundColor: 'default',
+          level: 1,
+          textAlignment: 'left',
+          textColor: 'default',
+        },
+        type: 'heading',
+      },
+    ];
+
+    const newPost = this.postRepo.create({
+      title,
+      description,
+      blocks: initialBlocks,
+      slug,
+    });
+
+    return await this.postRepo.save(newPost);
+  }
+
+  private generateUniqueSlug(title: string): string {
+    const baseSlug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    return `${baseSlug}-${Date.now()}`;
+  }
+
+  async getAllBlogs({
+    page = 1,
+    limit = 10,
+    search,
+  }: {
+    page: number;
+    limit: number;
+    search?: string;
+  }): Promise<BlogListResponseDto> {
+    const query = this.postRepo
+      .createQueryBuilder('blog')
+      .orderBy('blog.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (search) {
+      query.where(
+        'blog.title ILIKE :search OR blog.description ILIKE :search',
+        { search: `%${search}%` },
+      );
+    }
+
+    const [blogs, total] = await query.getManyAndCount();
+
+    return {
+      blogs,
+      total,
+      page,
+      limit,
+    };
   }
 }
